@@ -1,4 +1,7 @@
+#include <vector>
+#include <string>
 #include "TestCtrl.h"
+#include "website.h"
 
 void TestCtrl::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback)
 {
@@ -7,6 +10,8 @@ void TestCtrl::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<v
     //NOTE: The enum constant below is named "k200OK" (as in 200 OK), not "k2000K".
     resp->setStatusCode(k200OK);
     resp->setContentTypeCode(CT_TEXT_HTML);
-    resp->setBody("Hello World!");
+    std::vector<std::string> keywords;
+    auto site = new website(keywords, "en", "uhhh .... hi ?", "Hello World !");
+    resp->setBody(site->getPage());
     callback(resp);
 }
