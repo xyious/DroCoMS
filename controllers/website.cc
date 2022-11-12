@@ -12,6 +12,13 @@ std::string website::getTitle() {
     return this->title;
 }
 
+std::string website::getTitleTag() {
+    std::string title = "<title>";
+    title.append(this->title);
+    title.append("</title>");
+    return title;
+}
+
 std::string website::getPage() {
     this->page = DOCTYPE;
     if (this->language == "de") {
@@ -19,6 +26,7 @@ std::string website::getPage() {
     } else {
         this->page.append(HTMLTAGEN);
     }
+    this->page.append(getTitleTag());
     this->page.append(BODYTAG);
     this->page.append(this->content);
     this->page.append(ENDTAG);

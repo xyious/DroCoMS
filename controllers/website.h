@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #include <vector>
 
@@ -12,6 +13,7 @@ class website {
     public:
         std::string     getPage();
         std::string     getTitle();
+        std::string     getTitleTag();
         std::string     getLanguague();
         
         website(std::vector<std::string> keywords, std::string languague, std::string title, std::string content);

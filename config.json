@@ -11,16 +11,21 @@
             //["Options", "-SessionTicket"], 
             //["Options", "Compression"]
         ]
-    },
+    },*/
     "listeners": [
         {
             //address: Ip address,0.0.0.0 by default
             "address": "0.0.0.0",
             //port: Port number
-            "port": 80,
+            "port": 9999,
             //https: If true, use https for security,false by default
             "https": false
         },
+        {
+            "address": "::",
+            "port": 9999,
+            "https": false
+        }/*,
         {
             "address": "0.0.0.0",
             "port": 443,
@@ -34,12 +39,12 @@
             "ssl_conf": [
                 //["MinProtocol", "TLSv1.3"]
             ]
-        }
+        }*/
     ],
     "db_clients": [
         {
             //name: Name of the client,'default' by default
-            //"name":"",
+            "name":"dwebsite",
             //rdbms: Server type, postgresql,mysql or sqlite3, "postgresql" by default
             "rdbms": "postgresql",
             //filename: Sqlite3 db file name
@@ -49,11 +54,11 @@
             //port: Server port, 5432 by default
             "port": 5432,
             //dbname: Database name
-            "dbname": "test",
+            "dbname": "dwebsite",
             //user: 'postgres' by default
-            "user": "",
+            //"user": "",
             //passwd: '' by default
-            "passwd": "",
+            "passwd": "password",
             //is_fast: false by default, if it is true, the client is faster but user can't call
             //any synchronous interface of it.
             "is_fast": false,
@@ -68,9 +73,9 @@
             "timeout": -1.0,
             //"auto_batch": this feature is only available for the PostgreSQL driver(version >= 14.0), see
             // the wiki for more details.
-            "auto_batch": false
+            "auto_batch": true
         }
-    ],
+    ],/*
     "redis_clients": [
         {
             //name: Name of the client,'default' by default
@@ -216,7 +221,7 @@
             "log_size_limit": 100000000,
             //log_level: "DEBUG" by default,options:"TRACE","DEBUG","INFO","WARN"
             //The TRACE level is only valid when built in DEBUG mode.
-            "log_level": "DEBUG"
+            "log_level": "TRACE"
         },
         //run_as_daemon: False by default
         "run_as_daemon": false,
@@ -233,9 +238,9 @@
         "use_brotli": false,
         //static_files_cache_time: 5 (seconds) by default, the time in which the static file response is cached,
         //0 means cache forever, the negative value means no cache
-        "static_files_cache_time": 5,
+        "static_files_cache_time": 0,
         //simple_controllers_map: Used to configure mapping from path to simple controller
-        "simple_controllers_map": [
+        /* "simple_controllers_map": [
             {
                 "path": "/path/name",
                 "controller": "controllerClassName",
@@ -247,7 +252,7 @@
                     "FilterClassName"
                 ]
             }
-        ],
+        ], */
         //idle_connection_timeout: Defaults to 60 seconds, the lifetime 
         //of the connection without read or write
         "idle_connection_timeout": 60,
@@ -290,7 +295,7 @@
         "reuse_port": false
     },
     //plugins: Define all plugins running in the application
-    "plugins": [
+    /* "plugins": [
         {
             //name: The class name of the plugin
             //"name": "drogon::plugin::SecureSSLRedirector",
@@ -305,7 +310,7 @@
                 "secure_ssl_host": "localhost:8849"
             }
         }
-    ],
+    ], */
     //custom_config: custom configuration for users. This object can be get by the app().getCustomConfig() method. 
     "custom_config": {}
 }
