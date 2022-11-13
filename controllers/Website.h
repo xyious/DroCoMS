@@ -1,4 +1,5 @@
 #pragma once
+#include <drogon/HttpResponse.h>
 #include <string>
 #include <vector>
 
@@ -11,10 +12,10 @@ class website {
         std::string                 page;
 
     public:
-        std::string     getPage();
-        std::string     getTitle();
-        std::string     getTitleTag();
-        std::string     getLanguague();
+        std::shared_ptr<drogon::HttpResponse>   getPage();
+        std::string                             getTitle();
+        std::string                             getTitleTag();
+        std::string                             getLanguague();
         
         website(std::vector<std::string> keywords, std::string languague, std::string title, std::string content);
 };

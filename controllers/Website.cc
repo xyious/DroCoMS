@@ -19,7 +19,8 @@ std::string website::getTitleTag() {
     return title;
 }
 
-std::string website::getPage() {
+std::shared_ptr<drogon::HttpResponse> website::getPage() {
+    auto resp = drogon::HttpResponse::newHttpResponse();
     this->page = DOCTYPE;
     if (this->language == "de") {
         this->page.append(HTMLTAGDE);
@@ -30,5 +31,6 @@ std::string website::getPage() {
     this->page.append(BODYTAG);
     this->page.append(this->content);
     this->page.append(ENDTAG);
-    return this->page;
+    resp->setBody(this->page);
+    return resp;
 }
