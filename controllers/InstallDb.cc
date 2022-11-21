@@ -1,6 +1,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <exception>
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 #include <drogon/orm/DbClient.h>
@@ -14,9 +15,17 @@ void InstallDb::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<
     std::vector<std::string> keywords;
     std::string query = "SELECT * FROM dwUsers;";
     auto clientPtr = drogon::app().getDbClient("dwebsite");
-    auto result = clientPtr->execSqlSync(query);
+    bool dbExists = false;
+    try {
+        auto result = clientPtr->execSqlSync(query);
+        if (result.size() > 0) {
+            dbExists = true;
+        }
+    } catch (std::exception& exc) {
+		std::cout << exc.what() << '\n';
+    }
     std::string output = "";
-    if (result.size() > 0) {
+    if (dbExists) {
         auto site = new website(keywords, "en", "Create Database", "Database already exists !");
         callback(site->getPage());
         return;
@@ -44,7 +53,7 @@ void InstallDb::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<
                 digest.push_back(hash[i]);
             }
             password = base64::encode(digest);
-            query = "CREATE TABLE IF NOT EXISTS dwBlog (title VARCHAR(255) PRIMARY KEY, subtitle VARCHAR(255), tags VARCHAR(255), content text, author int, create_timestamp timestamp DEFAULT current_timestamp, edit_timestamp timestamp);";
+            query = "CREATE TABLE IF NOT EXISTS dwBlog (title VARCHAR(255) PRIMARY KEY, subtitle VARCHAR(255), tags VARCHAR(255), content text, author int, isBlog int, create_timestamp timestamp DEFAULT current_timestamp, edit_timestamp timestamp);";
             output = "Installing Database....<br>";
             output.append("Creating blog table....<br>");
             auto result = clientPtr->execSqlSync(query);
@@ -57,10 +66,12 @@ void InstallDb::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<
             output.append(".... done !!!!");
             auto site = new website(keywords, "en", "Installing Database", output);
             callback(site->getPage());
+            return;
         } else {
             std::string form = "<form action='' method='post'><label for='username'>Username:</label><input type='text' name='username' required><br><label for='email'>Email:</label><input type='email' name='email' required><br><label for='name'>Name:</label><input type='text' name='name'><br><label for='password'>Password:</label><input type='password' name='password'><br><input type='submit' value='submit'><form>";
             auto site = new website(keywords, "en", "Create Database", form);
             callback(site->getPage());
+            return;
         }
     }
 }
