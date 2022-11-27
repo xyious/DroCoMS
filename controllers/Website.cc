@@ -29,13 +29,13 @@ std::string website::getStyleTag(std::string path = "") {
 }
 
 std::string website::getContent(std::string title, std::string subtitle, std::string content, std::string author, std::string timestamp, std::string tags) {
-    std::string result = "<h1>";
+    std::string result = "<div class='post-container'><h1>";
     result.append(title).append("</h1>");
     if (!subtitle.empty()) {
-        result.append("<h4>").append(subtitle).append("</h4>");
+        result.append("<h4>").append(subtitle).append("</h4><div class='content-container'>");
     }
     result.append(content);
-    result.append("<span class='post-time'>").append(timestamp).append("</span></span class='author-info'>").append(author).append("</span>");
+    result.append("</div><div class='post-info-container'><div class='post-time'>Posted: ").append(timestamp).append("</div><div class='author-info'> by ").append(author).append("</div></div></div>");
     return result;
 }
 
