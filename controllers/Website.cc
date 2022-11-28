@@ -28,7 +28,7 @@ std::string website::getStyleTag(std::string path = "") {
     return result;
 }
 
-std::string website::getContent(std::string title, std::string subtitle, std::string content, std::string author, std::string timestamp, std::string tags) {
+std::string website::getPost(std::string title, std::string subtitle, std::string content, std::string author, std::string timestamp, std::string tags) {
     std::string result = "<div class='post-container'><h1>";
     result.append(title).append("</h1>");
     if (!subtitle.empty()) {
