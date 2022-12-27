@@ -55,9 +55,9 @@ void Blog::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<void 
         form.append(row["name"].as<std::string>());
         form.append("</option>");
     }
-    form.append("</select><br><label for='isBlog'>isBlog ?:</label><input type='checkbox' id='isBlog' name='isBlog'><br><label for='content'>Content:</label><input type='textarea' name='content' value='");
+    form.append("</select><br><label for='isBlog'>isBlog ?:</label><input type='checkbox' id='isBlog' name='isBlog' checked><br><label for='content'>Content:</label><textarea name='content' cols='128' rows='50'>");
     form.append(content);
-    form.append("'><br><input type='submit' value='submit'><form>");
+    form.append("</textarea><br><input type='submit' value='submit'><form>");
     auto site = new website(keywords, "en", "Create Post", form);
     callback(site->getPage());
     return;

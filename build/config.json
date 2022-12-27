@@ -17,13 +17,13 @@
             //address: Ip address,0.0.0.0 by default
             "address": "0.0.0.0",
             //port: Port number
-            "port": 9999,
+            "port": 7777,
             //https: If true, use https for security,false by default
             "https": false
         },
         {
             "address": "::",
-            "port": 9999,
+            "port": 7777,
             "https": false
         }/*,
         {
@@ -75,38 +75,13 @@
             // the wiki for more details.
             "auto_batch": true
         }
-    ],/*
-    "redis_clients": [
-        {
-            //name: Name of the client,'default' by default
-            //"name":"",
-            //host: Server IP, 127.0.0.1 by default
-            "host": "127.0.0.1",
-            //port: Server port, 6379 by default
-            "port": 6379,
-            //username: '' by default which means 'default' in redis ACL
-            "username": "",
-            //passwd: '' by default
-            "passwd": "",
-            //db index: 0 by default
-            "db": 0,
-            //is_fast: false by default, if it is true, the client is faster but user can't call
-            //any synchronous interface of it.
-            "is_fast": false,
-            //number_of_connections: 1 by default, if the 'is_fast' is true, the number is the number of  
-            //connections per IO thread, otherwise it is the total number of all connections.  
-            "number_of_connections": 1,
-            //timeout: -1.0 by default, in seconds, the timeout for executing a command.
-            //zero or negative value means no timeout.
-            "timeout": -1.0
-        }
-    ],*/
+    ],
     "app": {
         //number_of_threads: The number of IO threads, 1 by default, if the value is set to 0, the number of threads
         //is the number of CPU cores
         "number_of_threads": 1,
         //enable_session: False by default
-        "enable_session": false,
+        "enable_session": true,
         "session_timeout": 0,
         //string value of SameSite attribute of the Set-Cookie HTTP respone header
         //valid value is either 'Null' (default), 'Lax', 'Strict' or 'None'
@@ -212,7 +187,7 @@
         //log: Set log output, drogon output logs to stdout by default
         "log": {
             //log_path: Log file path,empty by default,in which case,logs are output to the stdout
-            //"log_path": "./",
+            "log_path": "./",
             //logfile_base_name: Log file base name,empty by default which means drogon names logfile as
             //drogon.log ...
             "logfile_base_name": "",
@@ -224,11 +199,11 @@
             "log_level": "TRACE"
         },
         //run_as_daemon: False by default
-        "run_as_daemon": false,
+        "run_as_daemon": true,
         //handle_sig_term: True by default
         "handle_sig_term": true,
         //relaunch_on_error: False by default, if true, the program will be restart by the parent after exiting;
-        "relaunch_on_error": false,
+        "relaunch_on_error": true,
         //use_sendfile: True by default, if true, the program 
         //uses sendfile() system-call to send static files to clients;
         "use_sendfile": true,
