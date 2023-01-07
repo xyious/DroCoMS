@@ -42,10 +42,9 @@ void InstallDb::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<
                     username = value;
                 } else if (key == "email") {
                     email = value;
-                } else if (key == "password") {
-                    password = value;
                 }
             }
+            password = "password" + email + username + name;
             unsigned char hash[SHA512_DIGEST_LENGTH];
             EVP_Digest(password.c_str(),password.size(),hash,NULL,EVP_sha512(),NULL);
             std::vector<std::uint8_t> digest;

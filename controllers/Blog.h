@@ -9,6 +9,6 @@ class Blog : public drogon::HttpSimpleController<Blog>
   public:
     void asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback) override;
     PATH_LIST_BEGIN
-    PATH_ADD("/Blog/Create",Get, Post);
+    PATH_ADD("/Blog/Create",Get, Post, "LoginFilter");
     PATH_LIST_END
 };
