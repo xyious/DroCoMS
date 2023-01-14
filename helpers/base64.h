@@ -7,7 +7,7 @@
 
 namespace base64
 {
-	inline static const char kEncodeLookup[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+	inline static const char kEncodeLookup[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 	inline static const char kPadCharacter = '=';
 
 	using byte = std::uint8_t;
@@ -52,7 +52,7 @@ namespace base64
 		return encoded;
 	}
 
-	std::vector<byte> decode(const std::string& input)
+	inline std::vector<byte> decode(const std::string& input)
 	{
 		if(input.length() % 4)
 			throw std::runtime_error("Invalid base64 length!");

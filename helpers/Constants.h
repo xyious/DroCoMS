@@ -1,5 +1,4 @@
 #pragma once
-#include <string>
 
 const std::string DOCTYPE = "<!doctype html>";
 const std::string HTMLTAGEN = "<html lang=\"en\"><head>";
