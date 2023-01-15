@@ -30,7 +30,7 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
         return;
     }
     if (token.empty()) {
-        std::string query = "UPDATE dwUsers SET password=$1 WHERE email=$2;";
+        std::string query = "UPDATE dwUsers SET token=$1 WHERE email=$2;";
         auto clientPtr = drogon::app().getDbClient("dwebsite");
         std::string password = email + std::to_string(trantor::Date::date().microSecondsSinceEpoch());
         unsigned char hash[SHA512_DIGEST_LENGTH];
@@ -46,16 +46,15 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
         callback(site->getPage());
         return;
     } else {
-        long duration = 31L * 24 * 60 * 60 * 1000;
         std::string query = "SELECT * FROM dwUsers WHERE email=$1;";
         auto clientPtr = drogon::app().getDbClient("dwebsite");
         auto result = clientPtr->execSqlSync(query, email);
         if (result.size() > 0) {
             for (auto row : result) {
-                auto token = req->session()->get<std::string>("loginToken");
-                std::string password = row["password"].as<std::string>();
+                std::string password = row["token"].as<std::string>();
+                long duration = row["expiration"].as<long>();
                 if (password == token) {
-                    req->session()->insert("loginTimeout", trantor::Date::date().microSecondsSinceEpoch() + duration);
+                    req->session()->insert("loginTimeout", duration);
                     auto site = new website(keywords, "en", "Login", "Logged in....");
                     callback(site->getPage());
                     return;
@@ -63,7 +62,8 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
             }
         }
     }
-    auto site = new website(keywords, "en", "Login", "I fucked up");
-    callback(site->getPage());
+    auto res = drogon::HttpResponse::newHttpResponse();
+    res->setStatusCode(drogon::k401Unauthorized);
+    callback(res);
     return;
 }

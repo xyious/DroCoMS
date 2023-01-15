@@ -1,19 +1,10 @@
-/**
- *
- *  LoginFilter.h
- *
- */
-
 #pragma once
 
 #include <drogon/HttpFilter.h>
-using namespace drogon;
 
-
-class LoginFilter : public HttpFilter<LoginFilter>
+class LoginFilter : public drogon::HttpFilter<LoginFilter>
 {
   public:
-    LoginFilter() {}
-    void doFilter(const HttpRequestPtr &req, FilterCallback &&fcb, FilterChainCallback &&fccb) override;
+    void doFilter(const drogon::HttpRequestPtr &req, drogon::FilterCallback &&fcb, drogon::FilterChainCallback &&fccb) override;
 };
 

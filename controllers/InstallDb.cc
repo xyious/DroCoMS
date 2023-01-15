@@ -43,7 +43,7 @@ void InstallDb::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<
                 } else if (key == "email") {
                     email = value;
                 }
-                LOG_TRACE << "param " << key << ", value: " << value;
+                LOG_DEBUG << "param " << key << ", value: " << value;
             }
             query = "CREATE TABLE IF NOT EXISTS dwBlog (title VARCHAR(255) PRIMARY KEY, subtitle VARCHAR(255), tags VARCHAR(255), content text, author int, isBlog int, create_timestamp timestamp DEFAULT current_timestamp, edit_timestamp timestamp);";
             output = "Installing Database....<br>";
@@ -65,7 +65,7 @@ void InstallDb::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<
             unsigned long long expiration = trantor::Date::date().microSecondsSinceEpoch() + (10L * 365 * 24 * 60 * 60 * 1000);         // The first user gets to stay logged in for 10 years (because it's me and I make good decisions)
             req->session()->insert("loginTimeout",  expiration);
             result = clientPtr->execSqlSync(query, username, email, name, token, expiration, 1);
-            LOG_TRACE << "username: " << username << ", email: " << email << ", name: " << name << ", token: " << token << ", expiration: " << expiration;
+            LOG_DEBUG << "username: " << username << ", email: " << email << ", name: " << name << ", token: " << token << ", expiration: " << expiration;
             output.append(".... done !!!!");
             auto site = new website(keywords, "en", "Installing Database", output);
             callback(site->getPage());
