@@ -20,10 +20,10 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
         } else if (key == "password") {
             token = value;
         }
-        LOG_DEBUG << key << ", " << value;
+        LOG_TRACE << key << ", " << value;
     }
     if (email.empty() || (!req->session()->get<std::string>("email").empty() && email != req->session()->get<std::string>("email"))) {
-        LOG_DEBUG << email << " " << req->session()->get<std::string>("email");
+        LOG_TRACE << email << " " << req->session()->get<std::string>("email");
         std::string form = "<form action='' method='post'><label for='username'>Username:</label><input type='text' name='username' required><br><label for='email'>Email:</label><input type='email' name='email'><br><input type='submit' value='submit'><form>";
         auto site = new website(keywords, "en", "Login", form);
         callback(site->getPage());
@@ -55,6 +55,7 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
                 long duration = row["expiration"].as<long>();
                 if (password == token) {
                     req->session()->insert("loginTimeout", duration);
+                    req->session()->modify<long>("loginTimeout", [duration](long expiration) {expiration = duration;});
                     auto site = new website(keywords, "en", "Login", "Logged in....");
                     callback(site->getPage());
                     return;

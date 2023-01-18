@@ -1,4 +1,5 @@
 #include <iostream>
+#include <regex>
 #include "Website.h"
 #include "Blog.h"
 
@@ -11,7 +12,7 @@ void Blog::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<void 
         for (auto param : params) {
             std::string key = std::get<0>(param);
             std::string value = std::get<1>(param);
-            std::cout << key << " " << value << std::endl;
+            LOG_TRACE << "key: " << key << ", value: " << value;
             if (key == "title") {
                 title = value;
             } else if (key == "subtitle") {
@@ -19,7 +20,9 @@ void Blog::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<void 
             } else if (key == "tags") {
                 tags = value;
             } else if (key == "content") {
-                content = value;
+                value = std::regex_replace(value, std::regex("\\r\\n\\r\\n"), "</p><br><p>");
+                value = std::regex_replace(value, std::regex("\\r\\n"), "</p><p>");
+                content = "<p>" + value + "</p>";
             } else if (key == "author") {
                 author = value;
             } else if (key == "isBlog") {
@@ -31,13 +34,14 @@ void Blog::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<void 
         auto clientPtr = drogon::app().getDbClient("dwebsite");
         std::string query = "INSERT INTO dwblog (title, subtitle, content, isBlog, author) VALUES ($1, $2, $3, $4, $5)";
         try {
-            auto result = clientPtr->execSqlSync(query, title, subtitle, content, isBlog, author);       // TODO: obviously fix this, need to make isBlog and author dropdown once I figure out how to create more users
+            auto result = clientPtr->execSqlSync(query, title, subtitle, content, isBlog, author);
+            LOG_TRACE << "Title: " << title << ", subtitle: " << subtitle << ", Author: " << author << ", Content: " << content;
             auto site = new website(keywords, "en", "Creating Post !", "Creating Post !");
             callback(site->getPage());
             return;
         }
         catch (std::exception const& e) {
-            std::cerr << e.what() << std::endl;
+            LOG_ERROR << "Exception in Blog.cc: " << e.what();
         }
     }
     auto clientPtr = drogon::app().getDbClient("dwebsite");
