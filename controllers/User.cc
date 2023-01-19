@@ -54,8 +54,11 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
                 std::string password = row["token"].as<std::string>();
                 long duration = row["expiration"].as<long>();
                 if (password == token) {
-                    req->session()->insert("loginTimeout", duration);
-                    req->session()->modify<long>("loginTimeout", [duration](long expiration) {expiration = duration;});
+                    if(req->session()->find("loginTimeout")) {
+                        req->session()->modify<long>("loginTimeout", [duration](long expiration) {expiration = duration;});
+                    } else {
+                        req->session()->insert("loginTimeout", duration);
+                    }
                     auto site = new website(keywords, "en", "Login", "Logged in....");
                     callback(site->getPage());
                     return;

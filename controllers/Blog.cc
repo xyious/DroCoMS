@@ -1,4 +1,3 @@
-#include <iostream>
 #include <regex>
 #include "Website.h"
 #include "Blog.h"
@@ -32,10 +31,12 @@ void Blog::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<void 
             }
         }
         auto clientPtr = drogon::app().getDbClient("dwebsite");
-        std::string query = "INSERT INTO dwblog (title, subtitle, content, isBlog, author) VALUES ($1, $2, $3, $4, $5)";
+        std::string url = std::regex_replace(title, std::regex(" "), "-");
+        url = std::regex_replace(url, std::regex("[^A-Za-z0-9-_]"), "");
+        std::string query = "INSERT INTO dwblog (url, title, subtitle, content, isBlog, author) VALUES ($1, $2, $3, $4, $5, $6)";
         try {
-            auto result = clientPtr->execSqlSync(query, title, subtitle, content, isBlog, author);
-            LOG_TRACE << "Title: " << title << ", subtitle: " << subtitle << ", Author: " << author << ", Content: " << content;
+            auto result = clientPtr->execSqlSync(query, url, title, subtitle, content, isBlog, author);
+            LOG_TRACE << "Url: " << url << ", Title: " << title << ", Subtitle: " << subtitle << ", Author: " << author << ", Content: " << content;
             auto site = new website(keywords, "en", "Creating Post !", "Creating Post !");
             callback(site->getPage());
             return;

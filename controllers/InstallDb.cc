@@ -45,7 +45,7 @@ void InstallDb::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<
                 }
                 LOG_DEBUG << "param " << key << ", value: " << value;
             }
-            query = "CREATE TABLE IF NOT EXISTS dwBlog (title VARCHAR(255) PRIMARY KEY, subtitle VARCHAR(255), tags VARCHAR(255), content text, author int, isBlog int, create_timestamp timestamp DEFAULT current_timestamp, edit_timestamp timestamp);";
+            query = "CREATE TABLE IF NOT EXISTS dwBlog (url VARCHAR(255) PRIMARY KEY, title VARCHAR(255), subtitle VARCHAR(255), tags VARCHAR(255), content text, author int, isBlog int, create_timestamp timestamp DEFAULT current_timestamp, edit_timestamp timestamp);";
             output = "Installing Database....<br>";
             output.append("Creating blog table....<br>");
             auto result = clientPtr->execSqlSync(query);
