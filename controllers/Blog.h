@@ -1,14 +1,15 @@
 #pragma once
 
-#include <drogon/HttpSimpleController.h>
+#include <drogon/HttpController.h>
 
-using namespace drogon;
-
-class Blog : public drogon::HttpSimpleController<Blog>
+class Blog : public drogon::HttpController<Blog>
 {
   public:
-    void asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback) override;
-    PATH_LIST_BEGIN
-    PATH_ADD("/Blog/Create",Get, Post, "LoginFilter");
-    PATH_LIST_END
+    METHOD_LIST_BEGIN
+    ADD_METHOD_TO(Blog::create, "/Blog/Create", drogon::Get, drogon::Post, "LoginFilter");
+    ADD_METHOD_TO(Blog::renderPost, "/Blog/{url}", drogon::Get);
+    METHOD_LIST_END
+    
+    void create(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback);
+    void renderPost(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string url);
 };

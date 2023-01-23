@@ -1,6 +1,5 @@
 #include <vector>
 #include <string>
-#include <iostream>
 #include "SiteController.h"
 #include "Website.h"
 
@@ -16,7 +15,6 @@ void SiteController::asyncHandleHttpRequest(const HttpRequestPtr& req, std::func
             title = row["title"].as<std::string>();
         }
         content.append(website::getPost(row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), row["tags"].as<std::string>()));
-        std::cout << content << std::endl;
     }
     auto site = new website(keywords, "en", title, content);
     callback(site->getPage());

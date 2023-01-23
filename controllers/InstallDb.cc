@@ -1,6 +1,5 @@
 #include <vector>
 #include <string>
-#include <iostream>
 #include <exception>
 #include <openssl/evp.h>
 #include <openssl/sha.h>
@@ -10,7 +9,7 @@
 #include "../helpers/base64.h"
 #include "Website.h"
 
-void InstallDb::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback)
+void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback)
 {
     std::vector<std::string> keywords;
     std::string query = "SELECT * FROM dwUsers;";
@@ -22,7 +21,7 @@ void InstallDb::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<
             dbExists = true;
         }
     } catch (std::exception& exc) {
-		std::cout << exc.what() << '\n';
+		LOG_ERROR << exc.what() << '\n';
     }
     std::string output = "";
     if (dbExists) {
@@ -30,7 +29,7 @@ void InstallDb::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<
         callback(site->getPage());
         return;
     } else {
-        if (req->getMethod() == HttpMethod::Post) {
+        if (req->getMethod() == drogon::HttpMethod::Post) {
             std::string username, email, name, token;
             auto params = req->getParameters();
             for (auto param : params) {
@@ -43,7 +42,7 @@ void InstallDb::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<
                 } else if (key == "email") {
                     email = value;
                 }
-                LOG_DEBUG << "param " << key << ", value: " << value;
+                LOG_TRACE << "param " << key << ", value: " << value;
             }
             query = "CREATE TABLE IF NOT EXISTS dwBlog (url VARCHAR(255) PRIMARY KEY, title VARCHAR(255), subtitle VARCHAR(255), tags VARCHAR(255), content text, author int, isBlog int, create_timestamp timestamp DEFAULT current_timestamp, edit_timestamp timestamp);";
             output = "Installing Database....<br>";
@@ -62,10 +61,10 @@ void InstallDb::asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<
                 digest.push_back(hash[i]);
             }
             token = base64::encode(digest);
-            unsigned long long expiration = trantor::Date::date().microSecondsSinceEpoch() + (10L * 365 * 24 * 60 * 60 * 1000);         // The first user gets to stay logged in for 10 years (because it's me and I make good decisions)
+            unsigned long long expiration = trantor::Date::date().microSecondsSinceEpoch() + (365L * 24 * 60 * 60 * 1000);         // The first user gets to stay logged in for 1 year (because it's me and I make good decisions)
             req->session()->insert("loginTimeout",  expiration);
             result = clientPtr->execSqlSync(query, username, email, name, token, expiration, 1);
-            LOG_DEBUG << "username: " << username << ", email: " << email << ", name: " << name << ", token: " << token << ", expiration: " << expiration;
+            LOG_TRACE << "username: " << username << ", email: " << email << ", name: " << name << ", token: " << token << ", expiration: " << expiration;
             output.append(".... done !!!!");
             auto site = new website(keywords, "en", "Installing Database", output);
             callback(site->getPage());

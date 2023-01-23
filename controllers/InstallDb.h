@@ -2,13 +2,11 @@
 
 #include <drogon/HttpSimpleController.h>
 
-using namespace drogon;
-
 class InstallDb : public drogon::HttpSimpleController<InstallDb>
 {
   public:
-    void asyncHandleHttpRequest(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback) override;
+    void asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback) override;
     PATH_LIST_BEGIN
-    PATH_ADD("/InstallDb",Get, Post);
+    PATH_ADD("/InstallDb", drogon::Get, drogon::Post);
     PATH_LIST_END
 };

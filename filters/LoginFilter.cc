@@ -8,6 +8,7 @@ void LoginFilter::doFilter(const drogon::HttpRequestPtr &req, drogon::FilterCall
     LOG_DEBUG << "now: " << now << ", timeout: " << timeout;
     if (timeout > now) {
         fccb();
+        return;
     }
     auto res = drogon::HttpResponse::newHttpResponse();
     res->setStatusCode(drogon::k401Unauthorized);
