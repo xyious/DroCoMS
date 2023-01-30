@@ -21,7 +21,7 @@ void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::f
             dbExists = true;
         }
     } catch (std::exception& exc) {
-		LOG_ERROR << exc.what() << '\n';
+		LOG_ERROR << exc.what();
     }
     std::string output = "";
     if (dbExists) {
@@ -44,10 +44,16 @@ void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::f
                 }
                 LOG_TRACE << "param " << key << ", value: " << value;
             }
-            query = "CREATE TABLE IF NOT EXISTS dwBlog (url VARCHAR(255) PRIMARY KEY, title VARCHAR(255), subtitle VARCHAR(255), tags VARCHAR(255), content text, author int, isBlog int, create_timestamp timestamp DEFAULT current_timestamp, edit_timestamp timestamp);";
+            query = "CREATE TABLE IF NOT EXISTS dwBlog (post_id SERIAL PRIMARY KEY, url VARCHAR(255), title VARCHAR(255), subtitle VARCHAR(255), tags VARCHAR(255), content text, author int, isBlog int, create_timestamp timestamp DEFAULT current_timestamp, edit_timestamp timestamp);";
             output = "Installing Database....<br>";
             output.append("Creating blog table....<br>");
             auto result = clientPtr->execSqlSync(query);
+            output.append(".... done<br>Creating Tags table....<br>");
+            query = "CREATE TABLE IF NOT EXISTS dwTags (tag_id SERIAL PRIMARY KEY, tag VARCHAR(255), description VARCHAR(255));";
+            result = clientPtr->execSqlSync(query);
+            output.append(".... done<br>Creating AssignedTags table....<br>");
+            query = "CREATE TABLE IF NOT EXISTS dwTagsAssigned (tag_id INT, post_id INT);";
+            result = clientPtr->execSqlSync(query);
             output.append(".... done<br>Creating users table....<br>");
             query = "CREATE TABLE IF NOT EXISTS dwUsers (id SERIAL PRIMARY KEY, username VARCHAR(255) UNIQUE, email VARCHAR(255), name VARCHAR(255), token VARCHAR(100), expiration BIGINT, can_post INT, create_timestamp timestamp DEFAULT current_timestamp);";
             result = clientPtr->execSqlSync(query);
