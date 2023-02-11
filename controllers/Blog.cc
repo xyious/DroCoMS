@@ -1,4 +1,5 @@
 #include <regex>
+#include <map>
 #include "helpers/helpers.h"
 #include "Website.h"
 #include "Blog.h"
@@ -35,11 +36,42 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
         auto clientPtr = drogon::app().getDbClient("dwebsite");
         std::string url = std::regex_replace(title, std::regex(" "), "-");
         url = std::regex_replace(url, std::regex("[^A-Za-z0-9-_]"), "");
-        std::string query = "INSERT INTO dwblog (url, title, subtitle, content, isBlog, author) VALUES ($1, $2, $3, $4, $5, $6)";
+        std::string query = "INSERT INTO dwblog (url, title, subtitle, content, isBlog, author) VALUES ($1, $2, $3, $4, $5, $6) RETURNING post_id";
         try {
+            std::string content = "Creating Post !<br>";
+            int postId;
             auto result = clientPtr->execSqlSync(query, url, title, subtitle, content, isBlog, author);
+            content.append("done .... <br>Adding Tags<br>");
             LOG_TRACE << "Url: " << url << ", Title: " << title << ", Subtitle: " << subtitle << ", Author: " << author << ", Content: " << content;
-            auto site = new website(keywords, "en", "Creating Post !", "Creating Post !");
+            for (auto row : result) {
+                postId = row["post_id"].as<int>();
+            }
+            std::map<std::string, int> tagMap;
+            query = "SELECT tag_id, tag FROM dwTags WHERE tag in ($1)";
+            result = clientPtr->execSqlSync(query, tags);
+            for (auto row : result) {
+                tagMap[row["tag"].as<std::string>()] = row["tag_id"].as<int>();
+            }
+            std::vector<std::string> newTags;
+            for (int i = 0; i < keywords.size(); i++) {
+                if (tagMap.count(keywords[i]) == 0) {
+                    newTags.push_back(keywords[i]);
+                }
+            }
+            for (int i = 0; i < newTags.size(); i++) {
+                query = "INSERT INTO dwTags (tag) VALUES ($1) RETURNING tag_id";
+                auto result = clientPtr->execSqlSync(query, newTags[i]);
+                for (auto row : result) {
+                    tagMap[newTags[i]] = row["tag_id"].as<int>();
+                }
+            }
+            content.append("done<br>Assigning Tags....<br>");
+            for (int i = 0; i < tagMap.size(); i++) {
+                query = "INSERT INTO dwTagsAssigned (tag_id, post_id) VALUES ($1, $2)";
+                result = clientPtr->execSqlSync(query, tags);
+            }
+            content.append("done");
+            auto site = new website(keywords, "en", "Creating Post !", content);
             callback(site->getPage());
             return;
         }
