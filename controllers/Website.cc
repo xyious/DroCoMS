@@ -28,9 +28,11 @@ std::string website::getStyleTag(std::string path = "") {
     return result;
 }
 
-std::string website::getPost(std::string title, std::string subtitle, std::string content, std::string author, std::string timestamp, std::string tags) {
-    std::string result = "<div class='post-container'><h1>";
-    result.append(title).append("</h1>");
+std::string website::getPost(std::string url, std::string title, std::string subtitle, std::string content, std::string author, std::string timestamp, std::string tags) {
+    std::string result = "<div class='post-container'><a href='http://xyious.com/Blog/";
+    result.append(url);
+    result.append("'><h1>")
+    result.append(title).append("</a></h1>");
     if (!subtitle.empty()) {
         result.append("<h4>").append(subtitle).append("</h4><div class='content-container'>");
     }
@@ -42,7 +44,7 @@ std::string website::getPost(std::string title, std::string subtitle, std::strin
 std::shared_ptr<drogon::HttpResponse> website::getPage() {
     auto resp = drogon::HttpResponse::newHttpResponse();
     this->page = DOCTYPE;
-    if (this->language == "de") {
+    if (this->language == "de-DE") {
         this->page.append(HTMLTAGDE);
     } else {
         this->page.append(HTMLTAGEN);

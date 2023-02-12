@@ -104,11 +104,11 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
 
 void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string url) {
     auto clientPtr = drogon::app().getDbClient("dwebsite");
-    std::string query = "SELECT dwBlog.title, dwBlog.subtitle, dwBlog.content, dwUsers.name, dwBlog.create_timestamp, dwBlog.tags FROM dwBlog, dwUsers WHERE dwBlog.author = dwUsers.id AND isBlog=1 AND url=$1 ORDER BY create_timestamp DESC LIMIT 1";
+    std::string query = "SELECT dwBlog.title, dwBlog.subtitle, dwBlog.url, dwBlog.content, dwUsers.name, dwBlog.create_timestamp, dwBlog.tags FROM dwBlog, dwUsers WHERE dwBlog.author = dwUsers.id AND isBlog=1 AND url=$1 ORDER BY create_timestamp DESC LIMIT 1";
     auto result = clientPtr->execSqlSync(query, url);
     std::vector<std::string> keywords;
     for (auto row : result) {
-        std::string content = website::getPost(row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), row["tags"].as<std::string>());
+        std::string content = website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), row["tags"].as<std::string>());
         auto site = new website(keywords, "en", row["title"].as<std::string>(), row["content"].as<std::string>());          // TODO: need to save/get language from database
         callback(site->getPage());                                                                                          // TODO: need to implement keywords/tags
         return;
@@ -117,11 +117,11 @@ void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (con
 
 void Blog::renderCategory(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string category) {
     auto clientPtr = drogon::app().getDbClient("dwebsite");
-    std::string query = "SELECT dwBlog.title, dwBlog.subtitle, dwBlog.content, dwUsers.name, dwBlog.create_timestamp, dwBlog.tags FROM dwBlog, dwUsers, dwTags, dwTagsAssigned WHERE dwBlog.author = dwUsers.id AND isBlog=1 AND dwBlog.post_id = dwTags.post_id AND dwTags.tag_id = dwTagsAssigned.tag_id AND dwTags.tag = $1 ORDER BY create_timestamp DESC LIMIT 3";
+    std::string query = "SELECT dwBlog.title, dwBlog.subtitle, dwBlog.url, dwBlog.content, dwUsers.name, dwBlog.create_timestamp, dwBlog.tags FROM dwBlog, dwUsers, dwTags, dwTagsAssigned WHERE dwBlog.author = dwUsers.id AND isBlog=1 AND dwBlog.post_id = dwTags.post_id AND dwTags.tag_id = dwTagsAssigned.tag_id AND dwTags.tag = $1 ORDER BY create_timestamp DESC LIMIT 3";
     auto result = clientPtr->execSqlSync(query, category);
     std::vector<std::string> keywords;
     for (auto row : result) {
-        std::string content = website::getPost(row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), row["tags"].as<std::string>());
+        std::string content = website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), row["tags"].as<std::string>());
         auto site = new website(keywords, "en", row["title"].as<std::string>(), row["content"].as<std::string>());
         callback(site->getPage());
         return;

@@ -44,7 +44,7 @@ void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::f
                 }
                 LOG_TRACE << "param " << key << ", value: " << value;
             }
-            query = "CREATE TABLE IF NOT EXISTS dwBlog (post_id SERIAL PRIMARY KEY, url VARCHAR(255), title VARCHAR(255), subtitle VARCHAR(255), tags VARCHAR(255), content text, author int, isBlog int, create_timestamp timestamp DEFAULT current_timestamp, edit_timestamp timestamp);";
+            query = "CREATE TABLE IF NOT EXISTS dwBlog (post_id SERIAL PRIMARY KEY, url VARCHAR(255), title VARCHAR(255), subtitle VARCHAR(255), language CHAR(5), content text, author int, isBlog int, create_timestamp timestamp DEFAULT current_timestamp, edit_timestamp timestamp);";
             output = "Installing Database....<br>";
             output.append("Creating blog table....<br>");
             auto result = clientPtr->execSqlSync(query);
