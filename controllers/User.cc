@@ -30,19 +30,28 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
         return;
     }
     if (token.empty()) {
-        std::string query = "UPDATE dwUsers SET token=$1 WHERE email=$2;";
+        std::string query = "SELECT * FROM dwUsers WHERE email=$1";
         auto clientPtr = drogon::app().getDbClient("dwebsite");
-        std::string password = email + std::to_string(trantor::Date::date().microSecondsSinceEpoch());
-        unsigned char hash[SHA512_DIGEST_LENGTH];
-        EVP_Digest(password.c_str(),password.size(),hash,NULL,EVP_sha512(),NULL);
-        std::vector<std::uint8_t> digest;
-        for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) {
-            digest.push_back(hash[i]);
+        auto result = clientPtr->execSqlSync(query, email);
+        long duration = 0;
+        for (auto row : result) {
+            token = row["token"].as<std::string>();
+            duration = row["expiration"].as<long>();
         }
-        token = base64::encode(digest);
-        auto result = clientPtr->execSqlSync(query, token, email);
-        req->session()->insert("email", email);
-        auto site = new website(keywords, "en", "Login", "Sending Login Email");
+        if (duration == 0) {
+            std::string query = "UPDATE dwUsers SET token=$1 WHERE email=$2;";
+            std::string password = email + std::to_string(trantor::Date::date().microSecondsSinceEpoch());
+            unsigned char hash[SHA512_DIGEST_LENGTH];
+            EVP_Digest(password.c_str(),password.size(),hash,NULL,EVP_sha512(),NULL);
+            std::vector<std::uint8_t> digest;
+            for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) {
+                digest.push_back(hash[i]);
+            }
+            token = base64::encode(digest);
+            auto result = clientPtr->execSqlSync(query, token, email);
+            req->session()->insert("email", email);
+        }
+        auto site = new website(keywords, "en-US", "Login", "Sending Login Email");
         callback(site->getPage());
         return;
     } else {
@@ -55,9 +64,10 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
                 long duration = row["expiration"].as<long>();
                 if (password == token) {
                     if (req->session()->find("loginTimeout")) {
-                        req->session()->modify<long>("loginTimeout", [duration](long expiration) {expiration = duration;});
+                        LOG_TRACE << "loginTimeout found";
+                        req->session()->modify<std::string>("loginTimeout", [duration](std::string expiration) {expiration = std::to_string(duration);});
                     } else {
-                        req->session()->insert("loginTimeout", duration);
+                        req->session()->insert("loginTimeout", std::to_string(duration));
                     }
                     auto site = new website(keywords, "en", "Login", "Logged in....");
                     callback(site->getPage());

@@ -3,10 +3,14 @@
 
 void LoginFilter::doFilter(const drogon::HttpRequestPtr &req, drogon::FilterCallback &&fcb, drogon::FilterChainCallback &&fccb)
 {
-    long timeout = req->session()->get<long>("loginTimeout");
+    std::string timeout = req->session()->get<std::string>("loginTimeout");
     long now = trantor::Date::date().microSecondsSinceEpoch();
-    LOG_DEBUG << "now: " << now << ", timeout: " << timeout;
-    if (timeout > now) {
+    long expiration = 0;
+    if (!timeout.empty()) {
+        expiration = std::stol(timeout, nullptr, 10);
+    }
+    LOG_DEBUG << "now: " << now << ", timeout: " << expiration;
+    if (expiration > now) {
         fccb();
         return;
     }
