@@ -13,6 +13,10 @@ std::string website::getTitle() {
     return this->title;
 }
 
+std::string website::getLanguague() {
+    return this->language;
+}
+
 std::string website::getTitleTag() {
     std::string title = "<title>";
     title.append(this->title);

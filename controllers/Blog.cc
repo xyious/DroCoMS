@@ -86,7 +86,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
     form.append(title);
     form.append("' required><br><label for='subtitle'>Subtitle:</label><input type='text' name='subtitle' value='");
     form.append(subtitle);
-    form.append("'><br><label for='author'>Author:</label><select name='author'>");
+    form.append("'><br><label for='language'>Language:</label><select name='language'><option value='en-US'>English</option><option value='de-DE'>German</option><label for='author'>Author:</label><select name='author'>");
     for (auto row : result) {
         form.append("<option value='");
         form.append(row["id"].as<std::string>());
@@ -109,8 +109,8 @@ void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (con
     std::vector<std::string> keywords;
     for (auto row : result) {
         std::string content = website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), row["tags"].as<std::string>());
-        auto site = new website(keywords, "en", row["title"].as<std::string>(), row["content"].as<std::string>());          // TODO: need to save/get language from database
-        callback(site->getPage());                                                                                          // TODO: need to implement keywords/tags
+        auto site = new website(keywords, row["language"], row["title"].as<std::string>(), content);
+        callback(site->getPage());
         return;
     }
 }
@@ -120,10 +120,11 @@ void Blog::renderCategory(const drogon::HttpRequestPtr& req, std::function<void 
     std::string query = "SELECT dwBlog.title, dwBlog.subtitle, dwBlog.url, dwBlog.content, dwUsers.name, dwBlog.create_timestamp, dwBlog.tags FROM dwBlog, dwUsers, dwTags, dwTagsAssigned WHERE dwBlog.author = dwUsers.id AND isBlog=1 AND dwBlog.post_id = dwTags.post_id AND dwTags.tag_id = dwTagsAssigned.tag_id AND dwTags.tag = $1 ORDER BY create_timestamp DESC LIMIT 3";
     auto result = clientPtr->execSqlSync(query, category);
     std::vector<std::string> keywords;
+    std::string content;
     for (auto row : result) {
-        std::string content = website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), row["tags"].as<std::string>());
-        auto site = new website(keywords, "en", row["title"].as<std::string>(), row["content"].as<std::string>());
-        callback(site->getPage());
-        return;
+        content.append(website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), row["tags"].as<std::string>()));
     }
+    auto site = new website(keywords, row["language"], row["title"].as<std::string>(), content);
+    callback(site->getPage());
+    return;
 }

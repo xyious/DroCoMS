@@ -18,7 +18,7 @@ class website {
         std::string                             getTitleTag();
         std::string                             getStyleTag(std::string path);
         static std::string                      getPost(std::string url, std::string title, std::string subtitle, std::string content, std::string author, std::string timestamp, std::string tags);
-        std::string                             getLanguague();
+        std::string                             getLanguage();
         
         website(std::vector<std::string> keywords, std::string languague, std::string title, std::string content, std::string stylesheet = "");
 };
