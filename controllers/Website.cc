@@ -34,13 +34,11 @@ std::string website::getStyleTag(std::string path = "") {
 
 std::string website::getPost(std::string url, std::string title, std::string subtitle, std::string content, std::string author, std::string timestamp, std::vector<std::string> tags) {
     std::string result = "<div class='post-container'><a href='http://xyious.com/Blog/";
-    result.append(url);
-    result.append("'><h1>");
-    result.append(title).append("</a></h1>");
+    result.append(url).append("'><h1>").append(title).append("</a></h1>");
     if (!subtitle.empty()) {
-        result.append("<h4>").append(subtitle).append("</h4><div class='content-container'>");
+        result.append("<h4>").append(subtitle).append("</h4>");
     }
-    result.append(content);
+    result.append("<div class='content-container'>").append(content);
     result.append("</div><div class='post-info-container'><div class='post-time'>Posted: ").append(timestamp).append("</div><div class='author-info'> by ").append(author).append("</div></div></div>");
     return result;
 }
@@ -53,11 +51,7 @@ std::shared_ptr<drogon::HttpResponse> website::getPage() {
     } else {
         this->page.append(HTMLTAGEN);
     }
-    this->page.append(getTitleTag());
-    this->page.append(getStyleTag());
-    this->page.append(BODYTAG);
-    this->page.append(this->content);
-    this->page.append(ENDTAG);
+    this->page.append(getTitleTag()).append(getStyleTag()).append(BODYTAG).append(this->content).append(ENDTAG);
     resp->setBody(this->page);
     return resp;
 }

@@ -19,6 +19,7 @@ h4 {
 .post-container {
     text-align: justify;
     background-color: #110024;
+    border-radius: 25px;
 }
 
 .post-info-container {
@@ -27,7 +28,14 @@ h4 {
     width: 100%;
 }
 
+.post-time {
+    text-align: left;
+    padding: 0 30% 0 5%;
+    display: inline-block;
+}
+
 .author-info {
     text-align: right;
-    padding-right: 5%;
+    padding: 0 5% 0 30%;
+    display: inline-block;
 }
