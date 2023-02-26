@@ -41,10 +41,10 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
         LOG_TRACE << "Url: " << url << ", Title: " << title << ", Subtitle: " << subtitle << ", Author: " << author << ", Content: " << content;
         std::string query = "INSERT INTO dwblog (url, title, subtitle, content, isBlog, author, language) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING post_id";
         try {
-            std::string content = "Creating Post !<br>";
+            std::string log = "Creating Post !<br>";
             int postId;
             auto result = clientPtr->execSqlSync(query, url, title, subtitle, content, isBlog, author, language);
-            content.append("done .... <br>Adding Tags<br>");
+            log.append("done .... <br>Adding Tags<br>");
             for (auto row : result) {
                 postId = row["post_id"].as<int>();
             }
@@ -67,13 +67,13 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
                     tagMap[newTags[i]] = row["tag_id"].as<int>();
                 }
             }
-            content.append("done<br>Assigning Tags....<br>");
+            log.append("done<br>Assigning Tags....<br>");
             for (const auto& [key, value] : tagMap) {
                 query = "INSERT INTO dwTagsAssigned (tag_id, post_id) VALUES ($1, $2)";
                 result = clientPtr->execSqlSync(query, value, postId);
             }
-            content.append("done");
-            auto site = new website(keywords, "en", "Creating Post !", content);
+            log.append("done");
+            auto site = new website(keywords, "en", "Creating Post !", log);
             callback(site->getPage());
             return;
         }
@@ -108,7 +108,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
 
 void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string url) {
     auto clientPtr = drogon::app().getDbClient("dwebsite");
-    std::string query = "SELECT dwBlog.language, dwBlog.title, dwBlog.subtitle, dwBlog.url, dwBlog.content, dwUsers.name, dwBlog.create_timestamp, dwBlog.tags FROM dwBlog, dwUsers WHERE dwBlog.author = dwUsers.id AND isBlog=1 AND url=$1 ORDER BY create_timestamp DESC LIMIT 1";
+    std::string query = "SELECT dwBlog.language, dwBlog.title, dwBlog.subtitle, dwBlog.url, dwBlog.content, dwUsers.name, dwBlog.create_timestamp FROM dwBlog, dwUsers WHERE dwBlog.author = dwUsers.id AND isBlog=1 AND url=$1 ORDER BY create_timestamp DESC LIMIT 1";
     auto result = clientPtr->execSqlSync(query, url);
     std::vector<std::string> keywords;
     for (auto row : result) {
@@ -121,7 +121,7 @@ void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (con
 
 void Blog::renderCategory(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string category) {
     auto clientPtr = drogon::app().getDbClient("dwebsite");
-    std::string query = "SELECT dwBlog.language, dwBlog.title, dwBlog.subtitle, dwBlog.url, dwBlog.content, dwUsers.name, dwBlog.create_timestamp, dwBlog.tags FROM dwBlog, dwUsers, dwTags, dwTagsAssigned WHERE dwBlog.author = dwUsers.id AND isBlog=1 AND dwBlog.post_id = dwTags.post_id AND dwTags.tag_id = dwTagsAssigned.tag_id AND dwTags.tag = $1 ORDER BY create_timestamp DESC LIMIT 3";
+    std::string query = "SELECT dwBlog.language, dwBlog.title, dwBlog.subtitle, dwBlog.url, dwBlog.content, dwUsers.name, dwBlog.create_timestamp FROM dwBlog, dwUsers, dwTags, dwTagsAssigned WHERE dwBlog.author = dwUsers.id AND isBlog=1 AND dwBlog.post_id = dwTags.post_id AND dwTags.tag_id = dwTagsAssigned.tag_id AND dwTags.tag = $1 ORDER BY create_timestamp DESC LIMIT 3";
     auto result = clientPtr->execSqlSync(query, category);
     std::vector<std::string> keywords;
     std::string content, language, title;
