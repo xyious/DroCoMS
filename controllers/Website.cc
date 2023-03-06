@@ -1,12 +1,20 @@
 #include "Website.h"
 #include "../helpers/Constants.h"
 
-website::website(std::vector<std::string> keywords, std::string languague, std::string title, std::string content, std::string stylesheet) {
+website::website(std::vector<std::string> keywords, std::string languague, std::string title, std::string content, std::string leftSidebarContent, std::string rightSidebarContent, std::string stylesheet) {
     this->keywords = keywords;
     this->language = language;
     this->title = title;
     this->content = content;
     this->stylesheet = stylesheet;
+    if (leftSidebarContent.empty()) {
+        leftSidebarContent = "<div class='left-sidebar'><a href='http://xyious.com'>Home</a></div>";
+    }
+    if (rightSidebarContent.empty()) {
+        rightSidebarContent = "<div class='right-sidebar'>&nbsp;</div>";
+    }
+    this->leftSidebarContent = leftSidebarContent;
+    this->rightSidebarContent = rightSidebarContent;
 }
 
 std::string website::getTitle() {
@@ -38,7 +46,7 @@ std::string website::getPost(std::string url, std::string title, std::string sub
     if (!subtitle.empty()) {
         result.append("<h4>").append(subtitle).append("</h4>");
     }
-    result.append("<div class='content-container'>").append(content);
+    result.append("<div class='post-content-container'>").append(content);
     result.append("</div><div class='post-info-container'><div class='post-time'>Posted: ").append(timestamp).append("</div><div class='author-info'> by ").append(author).append("</div></div></div>");
     return result;
 }
@@ -51,7 +59,7 @@ std::shared_ptr<drogon::HttpResponse> website::getPage() {
     } else {
         this->page.append(HTMLTAGEN);
     }
-    this->page.append(getTitleTag()).append(getStyleTag()).append(BODYTAG).append(this->content).append(ENDTAG);
+    this->page.append(getTitleTag()).append(getStyleTag()).append(BODYTAG).append(this->leftSidebarContent).append(this->rightSidebarContent).append("<div class='content-container'>").append(this->content).append("</div>").append(ENDTAG);
     resp->setBody(this->page);
     return resp;
 }

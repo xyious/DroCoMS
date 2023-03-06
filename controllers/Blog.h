@@ -14,4 +14,6 @@ class Blog : public drogon::HttpController<Blog>
     void create(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback);
     void renderPost(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string url);
     void renderCategory(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string category);
+    std::string getLeftSidebar();
+    std::string getRightSidebar();
 };

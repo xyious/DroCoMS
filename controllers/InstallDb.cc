@@ -25,7 +25,7 @@ void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::f
     }
     std::string output = "";
     if (dbExists) {
-        auto site = new website(keywords, "en", "Create Database", "Database already exists !");
+        auto site = new website(keywords, "en", "Create Database", "Database already exists !", "", "");
         callback(site->getPage());
         return;
     } else {
@@ -72,12 +72,12 @@ void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::f
             result = clientPtr->execSqlSync(query, username, email, name, token, expiration, 1);
             LOG_TRACE << "username: " << username << ", email: " << email << ", name: " << name << ", token: " << token << ", expiration: " << expiration;
             output.append(".... done !!!!");
-            auto site = new website(keywords, "en", "Installing Database", output);
+            auto site = new website(keywords, "en", "Installing Database", output, "", "");
             callback(site->getPage());
             return;
         } else {
             std::string form = "<form action='' method='post'><label for='username'>Username:</label><input type='text' name='username' required><br><label for='email'>Email:</label><input type='email' name='email' required><br><label for='name'>Name:</label><input type='text' name='name'><br><input type='submit' value='submit'><form>";
-            auto site = new website(keywords, "en", "Create Database", form);
+            auto site = new website(keywords, "en", "Create Database", form, "", "");
             callback(site->getPage());
             return;
         }

@@ -73,7 +73,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
                 result = clientPtr->execSqlSync(query, value, postId);
             }
             log.append("done");
-            auto site = new website(keywords, "en", "Creating Post !", log);
+            auto site = new website(keywords, "en", "Creating Post !", log, getLeftSidebar(), getRightSidebar());
             callback(site->getPage());
             return;
         }
@@ -101,7 +101,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
     form.append("'><br><label for='content'>Content:</label><textarea name='content' cols='128' rows='50'>");
     form.append(content);
     form.append("</textarea><br><input type='submit' value='submit'><form>");
-    auto site = new website(keywords, "en", "Create Post", form);
+    auto site = new website(keywords, "en", "Create Post", form, getLeftSidebar(), getRightSidebar());
     callback(site->getPage());
     return;
 }
@@ -113,7 +113,7 @@ void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (con
     std::vector<std::string> keywords;
     for (auto row : result) {
         std::string content = website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), keywords);
-        auto site = new website(keywords, row["language"].as<std::string>(), row["title"].as<std::string>(), content);
+        auto site = new website(keywords, row["language"].as<std::string>(), row["title"].as<std::string>(), content, getLeftSidebar(), getRightSidebar());
         callback(site->getPage());
         return;
     }
@@ -134,7 +134,21 @@ void Blog::renderCategory(const drogon::HttpRequestPtr& req, std::function<void 
             language = row["language"].as<std::string>();
         }
     }
-    auto site = new website(keywords, language, title, content);
+    auto site = new website(keywords, language, title, content, getLeftSidebar(), getRightSidebar());
     callback(site->getPage());
     return;
 }
+
+std::string Blog::getLeftSidebar() {
+    std::string result = "<div class='left-sidebar'>";
+    result.append("<a href='http://xyious.com'>Home</a>");
+    result.append("</div>");
+    return result;
+}
+
+std::string Blog::getRightSidebar() {
+    std::string result = "<div class='right-sidebar'>";
+    result.append("</div>");
+    return result;
+}
+
