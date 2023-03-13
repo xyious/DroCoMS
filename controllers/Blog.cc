@@ -1,5 +1,7 @@
 #include <regex>
 #include <map>
+#include <iostream>
+#include <fstream>
 #include "helpers/helpers.h"
 #include "Website.h"
 #include "Blog.h"
@@ -103,6 +105,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
     form.append("</textarea><br><input type='submit' value='submit'><form>");
     auto site = new website(keywords, "en", "Create Post", form, getLeftSidebar(), getRightSidebar());
     callback(site->getPage());
+    createSitemap();
     return;
 }
 
@@ -139,6 +142,24 @@ void Blog::renderCategory(const drogon::HttpRequestPtr& req, std::function<void 
     return;
 }
 
+void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string category) {
+    auto clientPtr = drogon::app().getDbClient("dwebsite");
+    std::string query = "SELECT post_id, title, url FROM dwBlog ORDER BY create_timestamp DESC";
+    auto result = clientPtr->execSqlSync(query);
+    std::vector<std::string> keywords;
+    std::map<int, std::string> title, url;
+    std::map<int, std::vector<std::string>> tags;
+    std::string content;
+    for (auto row : result) {
+        title[row["post_id"].as<int>()] = row["title"].as<std::string>();
+        url[row["post_id"].as<int>()] = row["url"].as<std::string>();
+        // get tags from tags table turn tags and titles into urls to link and list all the posts
+    }
+    auto site = new website(keywords, "", "Blog Archive", content, getLeftSidebar(), getRightSidebar());
+    callback(site->getPage());
+    return;
+}
+
 std::string Blog::getLeftSidebar() {
     std::string result = "<div class='left-sidebar'>";
     result.append("<a href='http://xyious.com'>Home</a>");
@@ -152,3 +173,19 @@ std::string Blog::getRightSidebar() {
     return result;
 }
 
+void Blog::createSitemap() {
+    auto clientPtr = drogon::app().getDbClient("dwebsite");
+    std::string query = "SELECT url FROM dwBlog";
+    clientPtr->execSqlAsync(query, [](const drogon::orm::Result &result) {
+        std::ofstream sitemap;
+        sitemap.open("sitemap.txt", std::ios::out | std::ios::trunc);
+        for (auto row : result) {
+            sitemap << "http://xyious.com/" << row["url"].as<std::string>() << std::endl;
+        }
+        sitemap.close();
+    },
+    [](const drogon::orm::DrogonDbException &e) {
+        LOG_ERROR << "Exception in blog.cc:174: " << e.base().what();
+    });
+    return;
+}

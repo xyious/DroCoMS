@@ -23,33 +23,34 @@ h4 {
 .content-container {
     width: 78%;
     position: absolute;
-    height: 100%;
     left: 11%;
     top: 0px;
+    bottom: 0px;
 }
 
 .left-sidebar {
     background-color: #110024;
     width: 10%;
     position: absolute;
-    height: 100%;
-    overflow: hidden;
     padding-top: 25px;
+    overflow: hidden;
     border-radius: 25px;
     left: 0px;
     top: 0px;
+    bottom: 0px;
+    text-align: center;
 }
 
 .right-sidebar {
     background-color: #110024;
     width: 10%;
     position: absolute;
-    height: 100%;
     overflow: hidden;
     padding-top: 25px;
     border-radius: 25px;
     right: 0px;
     top: 0px;
+    bottom: 0px;
 }
 
 .post-container {
@@ -60,23 +61,20 @@ h4 {
 }
 
 .post-info-container {
-    margin: 0px;
-}
-
-.post-info-container {
-    margin-top: 10px;
     font-size: smaller;
-    width: 100%;
+    width: 90%;
+    padding: 10px 5% 0px 5%;
+    display: table;
 }
 
 .post-time {
     text-align: left;
-    padding: 0 30% 0 5%;
-    display: inline-block;
+    width: 50%;
+    display: table-cell;
 }
 
 .author-info {
     text-align: right;
-    padding: 0 5% 0 30%;
-    display: inline-block;
+    width: 50%;
+    display: table-cell;
 }
