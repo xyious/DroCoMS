@@ -37,6 +37,9 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
             }
         }
         keywords = helpers::split(tags, ",");
+        for (auto tag : keywords) {
+            tag = std::regex_replace(tag, std::regex(" "), "-");
+        }
         auto clientPtr = drogon::app().getDbClient("dwebsite");
         std::string url = std::regex_replace(title, std::regex(" "), "-");
         url = std::regex_replace(url, std::regex("[^A-Za-z0-9-_]"), "");
@@ -147,22 +150,47 @@ void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (
     std::string query = "SELECT post_id, title, url FROM dwBlog ORDER BY create_timestamp DESC";
     auto result = clientPtr->execSqlSync(query);
     std::vector<std::string> keywords;
-    std::map<int, std::string> title, url;
-    std::map<int, std::vector<std::string>> tags;
-    std::string content;
+    std::map<int, std::string> links;
+    std::string content = "<table><tr><th>Title</th><th>Keywords</th></tr>";
     for (auto row : result) {
-        title[row["post_id"].as<int>()] = row["title"].as<std::string>();
-        url[row["post_id"].as<int>()] = row["url"].as<std::string>();
+        std::string link = "<a href='";
+        link.append(row["url"].as<std::string>()).append("'>").append(row["title"].as<std::string>()).append("</a>");
         // get tags from tags table turn tags and titles into urls to link and list all the posts
+    }
+    for (auto link : links) {
+        query = "SELECT dwtags.tag FROM dwTags WHERE dwTags.tag_id = dwTagsAssigned.tag_id AND dwTagsAssigned.post_id = $1";
+        auto result = clientPtr->execSqlSync(query, link.first);
+        for (auto row : result) {
+            std::string tag = row["tag"].as<std::string>();
+            link.second.append("<a href='http://xyious.com/Categories/").append(tag).append("'>").append(tag).append("</a>");
+        }
+        content.append(link.second);
     }
     auto site = new website(keywords, "", "Blog Archive", content, getLeftSidebar(), getRightSidebar());
     callback(site->getPage());
     return;
 }
 
+void Blog::renderHome(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string category) {
+    std::vector<std::string> keywords;
+    auto clientPtr = drogon::app().getDbClient("dwebsite");
+    std::string query = "SELECT dwBlog.url, dwBlog.title, dwBlog.subtitle, dwBlog.content, dwUsers.name, dwBlog.create_timestamp FROM dwBlog, dwUsers WHERE dwBlog.author = dwUsers.id AND isBlog=1 ORDER BY create_timestamp DESC LIMIT 3";
+    auto result = clientPtr->execSqlSync(query);
+    std::string content, title;
+    for (auto row : result) {
+        if (title.empty()) {
+            title = row["title"].as<std::string>();
+        }
+        content.append(website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), keywords));
+    }
+    auto site = new website(keywords, "en", title, content, getLeftSidebar(), getRightSidebar());
+    callback(site->getPage());
+}
+
 std::string Blog::getLeftSidebar() {
     std::string result = "<div class='left-sidebar'>";
     result.append("<a href='http://xyious.com'>Home</a>");
+    result.append("<a href='http://xyious.com/Archive'>Archive</a>");
     result.append("</div>");
     return result;
 }
