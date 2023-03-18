@@ -145,33 +145,35 @@ void Blog::renderCategory(const drogon::HttpRequestPtr& req, std::function<void 
     return;
 }
 
-void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string category) {
+void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback) {
     auto clientPtr = drogon::app().getDbClient("dwebsite");
     std::string query = "SELECT post_id, title, url FROM dwBlog ORDER BY create_timestamp DESC";
     auto result = clientPtr->execSqlSync(query);
     std::vector<std::string> keywords;
     std::map<int, std::string> links;
-    std::string content = "<table><tr><th>Title</th><th>Keywords</th></tr>";
+    std::string content = "<table id='Archive'><tr><th>Title</th><th>Keywords</th></tr>";
     for (auto row : result) {
-        std::string link = "<a href='";
-        link.append(row["url"].as<std::string>()).append("'>").append(row["title"].as<std::string>()).append("</a>");
-        // get tags from tags table turn tags and titles into urls to link and list all the posts
+        std::string link = "<tr><td><a href='";
+        link.append(row["url"].as<std::string>()).append("'>").append(row["title"].as<std::string>()).append("</a></td><td>");
+        links[row["post_id"].as<int>()] = link;
     }
     for (auto link : links) {
-        query = "SELECT dwtags.tag FROM dwTags WHERE dwTags.tag_id = dwTagsAssigned.tag_id AND dwTagsAssigned.post_id = $1";
+        query = "SELECT dwtags.tag FROM dwTags, dwTagsAssigned WHERE dwTags.tag_id = dwTagsAssigned.tag_id AND dwTagsAssigned.post_id = $1";
         auto result = clientPtr->execSqlSync(query, link.first);
         for (auto row : result) {
             std::string tag = row["tag"].as<std::string>();
-            link.second.append("<a href='http://xyious.com/Categories/").append(tag).append("'>").append(tag).append("</a>");
+            keywords.push_back(tag);
+            link.second.append("<a href='https://xyious.com/Categories/").append(tag).append("'>").append(tag).append("</a> ");
         }
-        content.append(link.second);
+        content.append(link.second).append("</td></tr>");
     }
+    content.append("</table>");
+    content = "<div class='post-container'><h1>Archive</h1><div class='post-content-container'>" + content + "</div>";
     auto site = new website(keywords, "", "Blog Archive", content, getLeftSidebar(), getRightSidebar());
     callback(site->getPage());
-    return;
 }
 
-void Blog::renderHome(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string category) {
+void Blog::renderHome(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback) {
     std::vector<std::string> keywords;
     auto clientPtr = drogon::app().getDbClient("dwebsite");
     std::string query = "SELECT dwBlog.url, dwBlog.title, dwBlog.subtitle, dwBlog.content, dwUsers.name, dwBlog.create_timestamp FROM dwBlog, dwUsers WHERE dwBlog.author = dwUsers.id AND isBlog=1 ORDER BY create_timestamp DESC LIMIT 3";
@@ -183,15 +185,16 @@ void Blog::renderHome(const drogon::HttpRequestPtr& req, std::function<void (con
         }
         content.append(website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), keywords));
     }
-    auto site = new website(keywords, "en", title, content, getLeftSidebar(), getRightSidebar());
+    auto site = new website(keywords, "en-US", title, content, getLeftSidebar(), getRightSidebar());
     callback(site->getPage());
 }
 
 std::string Blog::getLeftSidebar() {
-    std::string result = "<div class='left-sidebar'>";
-    result.append("<a href='http://xyious.com'>Home</a>");
-    result.append("<a href='http://xyious.com/Archive'>Archive</a>");
-    result.append("</div>");
+    std::string result = "<div class='left-sidebar'><ul>";
+    result.append("<li><h1><a href='https://xyious.com'>Home</a></h1></li>");
+    result.append("<li><h1><a href='https://xyious.com/Blog/Archive'>Archive</a></h1></li>");
+    result.append("<li><h1><a href='https://spicylesbians.etsy.com'>My Etsy Shop</a></h1></li>")
+    result.append("</ul></div>");
     return result;
 }
 

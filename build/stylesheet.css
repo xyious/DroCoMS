@@ -21,18 +21,17 @@ h4 {
 }
 
 .content-container {
-    width: 78%;
     position: absolute;
     left: 11%;
+    right: 11%;
     top: 0px;
-    bottom: 0px;
 }
 
 .left-sidebar {
     background-color: #110024;
     width: 10%;
     position: absolute;
-    padding-top: 25px;
+    padding-top: 2%;
     overflow: hidden;
     border-radius: 25px;
     left: 0px;
@@ -46,7 +45,7 @@ h4 {
     width: 10%;
     position: absolute;
     overflow: hidden;
-    padding-top: 25px;
+    padding-top: 2%;
     border-radius: 25px;
     right: 0px;
     top: 0px;
@@ -54,7 +53,8 @@ h4 {
 }
 
 .post-container {
-    width: 100%;
+    width: 96%;
+    padding: 0 2%;
     text-align: justify;
     background-color: #110024;
     border-radius: 25px;
@@ -77,4 +77,9 @@ h4 {
     text-align: right;
     width: 50%;
     display: table-cell;
+}
+
+#Archive {
+    width: 100%;
+    text-align: left;
 }
