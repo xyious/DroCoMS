@@ -2,7 +2,7 @@
 #include <map>
 #include <iostream>
 #include <fstream>
-#include "helpers/constants.h"
+#include "helpers/Constants.h"
 #include "helpers/helpers.h"
 #include "Website.h"
 #include "Blog.h"
@@ -194,7 +194,7 @@ std::string Blog::getLeftSidebar() {
     std::string result = "<div class='left-sidebar'><ul>";
     result.append("<li><h1><a href='" + BASEURL + "'>Home</a></h1></li>");
     result.append("<li><h1><a href='" + BASEURL + "/Blog/Archive'>Archive</a></h1></li>");
-    result.append("<li><h1><a href='https://spicylesbians.etsy.com'>My Etsy Shop</a></h1></li>")
+    result.append("<li><h1><a href='https://spicylesbians.etsy.com'>My Etsy Shop</a></h1></li>");
     result.append("</ul></div>");
     return result;
 }
@@ -212,7 +212,7 @@ void Blog::createSitemap() {
         std::ofstream sitemap;
         sitemap.open("sitemap.txt", std::ios::out | std::ios::trunc);
         for (auto row : result) {
-            sitemap << BASEURL + "/" << row["url"].as<std::string>() << std::endl;
+            sitemap << BASEURL << "/" << row["url"].as<std::string>() << std::endl;
         }
         sitemap.close();
     },
