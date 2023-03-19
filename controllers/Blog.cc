@@ -79,7 +79,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
                 result = clientPtr->execSqlSync(query, value, postId);
             }
             log.append("done");
-            auto site = new website(keywords, "en", "Creating Post !", log, getLeftSidebar(), getRightSidebar());
+            auto site = new website(keywords, "en", "Creating Post !", log, getLeftSidebar(), getRightSidebar(keywords));
             callback(site->getPage());
             return;
         }
@@ -107,7 +107,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
     form.append("'><br><label for='content'>Content:</label><textarea name='content' cols='128' rows='50'>");
     form.append(content);
     form.append("</textarea><br><input type='submit' value='submit'><form>");
-    auto site = new website(keywords, "en", "Create Post", form, getLeftSidebar(), getRightSidebar());
+    auto site = new website(keywords, "en", "Create Post", form, getLeftSidebar(), getRightSidebar(keywords));
     callback(site->getPage());
     createSitemap();
     return;
@@ -115,20 +115,30 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
 
 void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string url) {
     auto clientPtr = drogon::app().getDbClient("dwebsite");
-    std::string query = "SELECT dwBlog.language, dwBlog.title, dwBlog.subtitle, dwBlog.url, dwBlog.content, dwUsers.name, dwBlog.create_timestamp FROM dwBlog, dwUsers WHERE dwBlog.author = dwUsers.id AND isBlog=1 AND url=$1 ORDER BY create_timestamp DESC LIMIT 1";
+    std::string query = "SELECT dwBlog.post_id, dwBlog.language, dwBlog.title, dwBlog.subtitle, dwBlog.url, dwBlog.content, dwUsers.name, dwBlog.create_timestamp FROM dwBlog, dwUsers WHERE dwBlog.author = dwUsers.id AND isBlog=1 AND url=$1 ORDER BY create_timestamp DESC LIMIT 1";
     auto result = clientPtr->execSqlSync(query, url);
     std::vector<std::string> keywords;
+    int id;
+    std::string language, title, content;
     for (auto row : result) {
-        std::string content = website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), keywords);
-        auto site = new website(keywords, row["language"].as<std::string>(), row["title"].as<std::string>(), content, getLeftSidebar(), getRightSidebar());
-        callback(site->getPage());
-        return;
+        id = row["post_id"].as<int>();
+        language = row["language"].as<std::string>();
+        title = row["title"].as<std::string>();
+        content = website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), keywords);
     }
+    query = "SELECT dwTags.tag_id, dwTags.tag FROM dwTags, dwTagsAssigned WHERE dwTags.tag_id = dwTagsAssigned.tag_id AND dwTagsAssigned.post_id = $1";
+    result = clientPtr->execSqlSync(query, id);
+    for (auto row : result) {
+        keywords.push_back(row["tag"].as<std::string>());
+    }
+    auto site = new website(keywords, language, title, content, getLeftSidebar(), getRightSidebar(keywords));
+    callback(site->getPage());
+    return;
 }
 
 void Blog::renderCategory(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string category) {
     auto clientPtr = drogon::app().getDbClient("dwebsite");
-    std::string query = "SELECT dwBlog.language, dwBlog.title, dwBlog.subtitle, dwBlog.url, dwBlog.content, dwUsers.name, dwBlog.create_timestamp FROM dwBlog, dwUsers, dwTags, dwTagsAssigned WHERE dwBlog.author = dwUsers.id AND isBlog=1 AND dwBlog.post_id = dwTags.post_id AND dwTags.tag_id = dwTagsAssigned.tag_id AND dwTags.tag = $1 ORDER BY create_timestamp DESC LIMIT 3";
+    std::string query = "SELECT dwBlog.language, dwBlog.title, dwBlog.subtitle, dwBlog.url, dwBlog.content, dwUsers.name, dwBlog.create_timestamp FROM dwBlog, dwUsers, dwTags, dwTagsAssigned WHERE dwBlog.author = dwUsers.id AND isBlog=1 AND dwBlog.post_id = dwTagsAssigned.post_id AND dwTags.tag_id = dwTagsAssigned.tag_id AND dwTags.tag = $1 ORDER BY create_timestamp DESC LIMIT 3";
     auto result = clientPtr->execSqlSync(query, category);
     std::vector<std::string> keywords;
     std::string content, language, title;
@@ -141,7 +151,7 @@ void Blog::renderCategory(const drogon::HttpRequestPtr& req, std::function<void 
             language = row["language"].as<std::string>();
         }
     }
-    auto site = new website(keywords, language, title, content, getLeftSidebar(), getRightSidebar());
+    auto site = new website(keywords, language, title, content, getLeftSidebar(), getRightSidebar(keywords));
     callback(site->getPage());
     return;
 }
@@ -170,7 +180,7 @@ void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (
     }
     content.append("</table>");
     content = "<div class='post-container'><h1>Archive</h1><div class='post-content-container'>" + content + "</div>";
-    auto site = new website(keywords, "", "Blog Archive", content, getLeftSidebar(), getRightSidebar());
+    auto site = new website(keywords, "", "Blog Archive", content, getLeftSidebar(), getRightSidebar(keywords));
     callback(site->getPage());
 }
 
@@ -186,7 +196,7 @@ void Blog::renderHome(const drogon::HttpRequestPtr& req, std::function<void (con
         }
         content.append(website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), keywords));
     }
-    auto site = new website(keywords, "en-US", title, content, getLeftSidebar(), getRightSidebar());
+    auto site = new website(keywords, "en-US", title, content, getLeftSidebar(), getRightSidebar(keywords));
     callback(site->getPage());
 }
 
@@ -199,9 +209,12 @@ std::string Blog::getLeftSidebar() {
     return result;
 }
 
-std::string Blog::getRightSidebar() {
-    std::string result = "<div class='right-sidebar'>";
-    result.append("</div>");
+std::string Blog::getRightSidebar(std::vector<std::string> keywords) {
+    std::string result = "<div class='right-sidebar'><ul>";
+    for (auto tag : keywords) {
+        result.append("<li><a href='" + BASEURL + "/Category/").append(tag).append("'>").append(tag).append("</a></ul>");
+    }
+    result.append("</ul></div>");
     return result;
 }
 
