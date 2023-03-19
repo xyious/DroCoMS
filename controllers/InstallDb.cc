@@ -6,7 +6,6 @@
 #include <drogon/orm/DbClient.h>
 #include <drogon/HttpTypes.h>
 #include "InstallDb.h"
-#include "../helpers/base64.h"
 #include "Website.h"
 
 void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback)
@@ -62,11 +61,7 @@ void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::f
             std::string password = email + std::to_string(trantor::Date::date().microSecondsSinceEpoch());
             unsigned char hash[SHA512_DIGEST_LENGTH];
             EVP_Digest(password.c_str(),password.size(),hash,NULL,EVP_sha512(),NULL);
-            std::vector<std::uint8_t> digest;
-            for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) {
-                digest.push_back(hash[i]);
-            }
-            token = base64::encode(digest);
+            token = drogon::utils::base64Encode(hash, SHA512_DIGEST_LENGTH, true);
             unsigned long long expiration = trantor::Date::date().microSecondsSinceEpoch() + (365L * 24 * 60 * 60 * 1000);         // The first user gets to stay logged in for 1 year (because it's me and I make good decisions)
             req->session()->insert("loginTimeout",  expiration);
             result = clientPtr->execSqlSync(query, username, email, name, token, expiration, 1);

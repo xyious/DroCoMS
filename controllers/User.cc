@@ -2,7 +2,7 @@
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 #include <trantor/utils/Date.h>
-#include "../helpers/base64.h"
+#include <trantor/utils/Utilities.h>
 #include "User.h"
 #include "Website.h"
 
@@ -43,11 +43,7 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
             std::string password = email + std::to_string(trantor::Date::date().microSecondsSinceEpoch());
             unsigned char hash[SHA512_DIGEST_LENGTH];
             EVP_Digest(password.c_str(),password.size(),hash,NULL,EVP_sha512(),NULL);
-            std::vector<std::uint8_t> digest;
-            for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) {
-                digest.push_back(hash[i]);
-            }
-            token = base64::encode(digest);
+            token = drogon::utils::base64Encode(hash, SHA512_DIGEST_LENGTH, true);
             auto result = clientPtr->execSqlSync(query, token, email);
             req->session()->insert("email", email);
         }
@@ -79,5 +75,4 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
     auto res = drogon::HttpResponse::newHttpResponse();
     res->setStatusCode(drogon::k401Unauthorized);
     callback(res);
-    return;
 }
