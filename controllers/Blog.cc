@@ -174,7 +174,7 @@ void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (
         for (auto row : result) {
             std::string tag = row["tag"].as<std::string>();
             keywords.push_back(tag);
-            link.second.append("<a href='" + BASEURL + "/Categories/").append(tag).append("'>").append(tag).append("</a> ");
+            link.second.append("<a href='" + helpers::BaseURL + "/Categories/").append(tag).append("'>").append(tag).append("</a> ");
         }
         content.append(link.second).append("</td></tr>");
     }
@@ -202,8 +202,8 @@ void Blog::renderHome(const drogon::HttpRequestPtr& req, std::function<void (con
 
 std::string Blog::getLeftSidebar() {
     std::string result = "<div class='left-sidebar'><ul>";
-    result.append("<li><h1><a href='" + BASEURL + "'>Home</a></h1></li>");
-    result.append("<li><h1><a href='" + BASEURL + "/Blog/Archive'>Archive</a></h1></li>");
+    result.append("<li><h1><a href='" + helpers::BaseURL + "'>Home</a></h1></li>");
+    result.append("<li><h1><a href='" + helpers::BaseURL + "/Blog/Archive'>Archive</a></h1></li>");
     result.append("<li><h1><a href='https://spicylesbians.etsy.com'>My Etsy Shop</a></h1></li>");
     result.append("</ul></div>");
     return result;
@@ -212,7 +212,7 @@ std::string Blog::getLeftSidebar() {
 std::string Blog::getRightSidebar(std::vector<std::string> keywords) {
     std::string result = "<div class='right-sidebar'><ul>";
     for (auto tag : keywords) {
-        result.append("<li><a href='" + BASEURL + "/Category/").append(tag).append("'>").append(tag).append("</a></ul>");
+        result.append("<li><a href='" + helpers::BaseURL + "/Category/").append(tag).append("'>").append(tag).append("</a></ul>");
     }
     result.append("</ul></div>");
     return result;
@@ -225,7 +225,7 @@ void Blog::createSitemap() {
         std::ofstream sitemap;
         sitemap.open("sitemap.txt", std::ios::out | std::ios::trunc);
         for (auto row : result) {
-            sitemap << BASEURL << "/" << row["url"].as<std::string>() << std::endl;
+            sitemap << helpers::BaseURL << "/" << row["url"].as<std::string>() << std::endl;
         }
         sitemap.close();
     },

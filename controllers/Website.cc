@@ -8,7 +8,7 @@ website::website(std::vector<std::string> keywords, std::string languague, std::
     this->content = content;
     this->stylesheet = stylesheet;
     if (leftSidebarContent.empty()) {
-        leftSidebarContent = "<div class='left-sidebar'><a href='" + BASEURL + "'>Home</a></div>";
+        leftSidebarContent = "<div class='left-sidebar'><a href='" + helpers::BaseURL + "'>Home</a></div>";
     }
     if (rightSidebarContent.empty()) {
         rightSidebarContent = "<div class='right-sidebar'>&nbsp;</div>";
@@ -41,7 +41,7 @@ std::string website::getStyleTag(std::string path = "") {
 }
 
 std::string website::getPost(std::string url, std::string title, std::string subtitle, std::string content, std::string author, std::string timestamp, std::vector<std::string> tags) {
-    std::string result = "<div class='post-container'><a href='" + BASEURL + "/Blog/";
+    std::string result = "<div class='post-container'><a href='" + helpers::BaseURL + "/Blog/";
     result.append(url).append("'><h1>").append(title).append("</a></h1>");
     if (!subtitle.empty()) {
         result.append("<h4>").append(subtitle).append("</h4>");

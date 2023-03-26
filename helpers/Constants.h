@@ -1,7 +1,5 @@
 #pragma once
 
-const std::string BASEURL = "https://xyious.com";
-
 const std::string DOCTYPE = "<!doctype html>";
 const std::string HTMLTAGEN = "<html lang=\"en-US\"><head>";
 const std::string HTMLTAGDE = "<html lang=\"de-DE\"><head>";
