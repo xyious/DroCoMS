@@ -193,5 +193,5 @@
         "reuse_port": false
     },
     //custom_config: custom configuration for users. This object can be get by the app().getCustomConfig() method. 
-    "custom_config": {"base_url": "https://xyious.com"}
+    "custom_config": {"base_url": "http://localhost:7777"}
 }

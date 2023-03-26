@@ -1,4 +1,5 @@
 #include "Website.h"
+#include "helpers/helpers.h"
 #include "../helpers/Constants.h"
 
 website::website(std::vector<std::string> keywords, std::string languague, std::string title, std::string content, std::string leftSidebarContent, std::string rightSidebarContent, std::string stylesheet) {

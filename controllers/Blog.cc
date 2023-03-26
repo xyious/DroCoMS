@@ -164,7 +164,7 @@ void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (
     std::map<int, std::string> links;
     std::string content = "<table id='Archive'><tr><th>Title</th><th>Keywords</th></tr>";
     for (auto row : result) {
-        std::string link = "<tr><td><a href='";
+        std::string link = "<tr><td><a href='" + helpers::BaseURL + "/Blog/";
         link.append(row["url"].as<std::string>()).append("'>").append(row["title"].as<std::string>()).append("</a></td><td>");
         links[row["post_id"].as<int>()] = link;
     }
@@ -174,7 +174,7 @@ void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (
         for (auto row : result) {
             std::string tag = row["tag"].as<std::string>();
             keywords.push_back(tag);
-            link.second.append("<a href='" + helpers::BaseURL + "/Categories/").append(tag).append("'>").append(tag).append("</a> ");
+            link.second.append("<a href='" + helpers::BaseURL + "/Category/").append(tag).append("'>").append(tag).append("</a> ");
         }
         content.append(link.second).append("</td></tr>");
     }
@@ -202,9 +202,9 @@ void Blog::renderHome(const drogon::HttpRequestPtr& req, std::function<void (con
 
 std::string Blog::getLeftSidebar() {
     std::string result = "<div class='left-sidebar'><ul>";
-    result.append("<li><h1><a href='" + helpers::BaseURL + "'>Home</a></h1></li>");
-    result.append("<li><h1><a href='" + helpers::BaseURL + "/Blog/Archive'>Archive</a></h1></li>");
-    result.append("<li><h1><a href='https://spicylesbians.etsy.com'>My Etsy Shop</a></h1></li>");
+    result.append("<li><h3><a href='" + helpers::BaseURL + "'>Home</a></h3></li>");
+    result.append("<li><h3><a href='" + helpers::BaseURL + "/Blog/Archive'>Archive</a></h3></li>");
+    result.append("<li><h3><a href='https://spicylesbians.etsy.com'>My Etsy Shop</a></h3></li>");
     result.append("</ul></div>");
     return result;
 }
