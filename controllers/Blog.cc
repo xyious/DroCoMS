@@ -187,14 +187,25 @@ void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (
 void Blog::renderHome(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback) {
     std::vector<std::string> keywords;
     auto clientPtr = drogon::app().getDbClient("dwebsite");
-    std::string query = "SELECT dwBlog.url, dwBlog.title, dwBlog.subtitle, dwBlog.content, dwUsers.name, dwBlog.create_timestamp FROM dwBlog, dwUsers WHERE dwBlog.author = dwUsers.id AND isBlog=1 ORDER BY create_timestamp DESC LIMIT 3";
+    std::string query = "SELECT dwBlog.post_id, dwBlog.url, dwBlog.title, dwBlog.subtitle, dwBlog.content, dwUsers.name, dwBlog.create_timestamp FROM dwBlog, dwUsers WHERE dwBlog.author = dwUsers.id AND isBlog=1 ORDER BY create_timestamp DESC LIMIT 3";
     auto result = clientPtr->execSqlSync(query);
-    std::string content, title;
+    std::string content, title, tags;
+    std::vector<int> ids;
     for (auto row : result) {
         if (title.empty()) {
             title = row["title"].as<std::string>();
         }
         content.append(website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), keywords));
+        ids.push_back(row["post_id"].as<int>());
+    }
+    query = "SELECT dwTags.tag FROM dwTags, dwTagsAssigned WHERE dwTags.tag_id = dwTagsAssigned.tag_id AND dwTagsAssigned.post_id IN ($1)";
+    for (auto val : ids) {
+        tags += std::to_string(val) + ", ";
+    }
+    tags = tags.substr(0, tags.size() - 2);
+    result = clientPtr->execSqlSync(query, tags);
+    for (auto row : result) {
+        keywords.push_back(row["tag"].as<std::string>());
     }
     auto site = new website(keywords, "en-US", title, content, getLeftSidebar(), getRightSidebar(keywords));
     callback(site->getPage());
@@ -230,7 +241,7 @@ void Blog::createSitemap() {
         sitemap.close();
     },
     [](const drogon::orm::DrogonDbException &e) {
-        LOG_ERROR << "Exception in blog.cc:174: " << e.base().what();
+        LOG_ERROR << "Exception in blog.cc: " << e.base().what();
     });
     return;
 }
