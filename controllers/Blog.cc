@@ -198,14 +198,16 @@ void Blog::renderHome(const drogon::HttpRequestPtr& req, std::function<void (con
         content.append(website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), keywords));
         ids.push_back(row["post_id"].as<int>());
     }
-    query = "SELECT dwTags.tag FROM dwTags, dwTagsAssigned WHERE dwTags.tag_id = dwTagsAssigned.tag_id AND dwTagsAssigned.post_id IN ($1)";
-    for (auto val : ids) {
-        tags += std::to_string(val) + ", ";
-    }
-    tags = tags.substr(0, tags.size() - 2);
-    result = clientPtr->execSqlSync(query, tags);
-    for (auto row : result) {
-        keywords.push_back(row["tag"].as<std::string>());
+    if (ids.size() > 0) {
+        query = "SELECT dwTags.tag FROM dwTags, dwTagsAssigned WHERE dwTags.tag_id = dwTagsAssigned.tag_id AND dwTagsAssigned.post_id IN ($1)";
+        for (auto val : ids) {
+            tags += std::to_string(val) + ", ";
+        }
+        tags = tags.substr(0, tags.size() - 2);
+        result = clientPtr->execSqlSync(query, tags);
+        for (auto row : result) {
+            keywords.push_back(row["tag"].as<std::string>());
+        }
     }
     auto site = new website(keywords, "en-US", title, content, getLeftSidebar(), getRightSidebar(keywords));
     callback(site->getPage());

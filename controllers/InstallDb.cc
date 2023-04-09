@@ -12,7 +12,7 @@ void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::f
 {
     std::vector<std::string> keywords;
     std::string query = "SELECT * FROM dwUsers;";
-    auto clientPtr = drogon::app().getDbClient("dwebsite");
+    auto clientPtr = drogon::app().getDbClient();
     bool dbExists = false;
     try {
         auto result = clientPtr->execSqlSync(query);

@@ -31,7 +31,7 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
     }
     if (token.empty()) {
         std::string query = "SELECT * FROM dwUsers WHERE email=$1";
-        auto clientPtr = drogon::app().getDbClient("dwebsite");
+        auto clientPtr = drogon::app().getDbClient();
         auto result = clientPtr->execSqlSync(query, email);
         long duration = 0;
         for (auto row : result) {
@@ -52,7 +52,7 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
         return;
     } else {
         std::string query = "SELECT * FROM dwUsers WHERE email=$1;";
-        auto clientPtr = drogon::app().getDbClient("dwebsite");
+        auto clientPtr = drogon::app().getDbClient();
         auto result = clientPtr->execSqlSync(query, email);
         if (result.size() > 0) {
             for (auto row : result) {
