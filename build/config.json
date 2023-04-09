@@ -6,20 +6,20 @@
             //address: Ip address,0.0.0.0 by default
             "address": "0.0.0.0",
             //port: Port number
-            "port": 7777,
+            "port": 7755,
             //https: If true, use https for security,false by default
             "https": false
         },
         {
             "address": "::",
-            "port": 7777,
+            "port": 7755,
             "https": false
         }
     ],
     "db_clients": [
         {
             //name: Name of the client,'default' by default
-            "name":"dwebsite",
+            "name":"dButtons",
             //rdbms: Server type, postgresql,mysql or sqlite3, "postgresql" by default
             "rdbms": "postgresql",
             //filename: Sqlite3 db file name
@@ -29,7 +29,7 @@
             //port: Server port, 5432 by default
             "port": 5432,
             //dbname: Database name
-            "dbname": "dwebsite",
+            "dbname": "dButtons",
             //user: 'postgres' by default
             //"user": "",
             //passwd: '' by default
@@ -193,5 +193,5 @@
         "reuse_port": false
     },
     //custom_config: custom configuration for users. This object can be get by the app().getCustomConfig() method. 
-    "custom_config": {"base_url": "http://localhost:7777"}
+    "custom_config": {"base_url": "http://localhost:7755"}
 }

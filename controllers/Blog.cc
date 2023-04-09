@@ -41,7 +41,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
         for (auto tag : keywords) {
             tag = std::regex_replace(tag, std::regex(" "), "-");
         }
-        auto clientPtr = drogon::app().getDbClient("dwebsite");
+        auto clientPtr = drogon::app().getDbClient();
         std::string url = std::regex_replace(title, std::regex(" "), "-");
         url = std::regex_replace(url, std::regex("[^A-Za-z0-9-_]"), "");
         LOG_TRACE << "Url: " << url << ", Title: " << title << ", Subtitle: " << subtitle << ", Author: " << author << ", Content: " << content;
@@ -87,7 +87,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
             LOG_ERROR << "Exception in Blog.cc: " << e.what();
         }
     }
-    auto clientPtr = drogon::app().getDbClient("dwebsite");
+    auto clientPtr = drogon::app().getDbClient();
     std::string query = "SELECT id, name FROM dwUsers";
     auto result = clientPtr->execSqlSync(query);
     std::string form = "<form action='' method='post'><label for='title'>Title:</label><input type='text' name='title' value='";
@@ -114,7 +114,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
 }
 
 void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string url) {
-    auto clientPtr = drogon::app().getDbClient("dwebsite");
+    auto clientPtr = drogon::app().getDbClient();
     std::string query = "SELECT dwBlog.post_id, dwBlog.language, dwBlog.title, dwBlog.subtitle, dwBlog.url, dwBlog.content, dwUsers.name, dwBlog.create_timestamp FROM dwBlog, dwUsers WHERE dwBlog.author = dwUsers.id AND isBlog=1 AND url=$1 ORDER BY create_timestamp DESC LIMIT 1";
     auto result = clientPtr->execSqlSync(query, url);
     std::vector<std::string> keywords;
@@ -137,7 +137,7 @@ void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (con
 }
 
 void Blog::renderCategory(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string category) {
-    auto clientPtr = drogon::app().getDbClient("dwebsite");
+    auto clientPtr = drogon::app().getDbClient();
     std::string query = "SELECT dwBlog.language, dwBlog.title, dwBlog.subtitle, dwBlog.url, dwBlog.content, dwUsers.name, dwBlog.create_timestamp FROM dwBlog, dwUsers, dwTags, dwTagsAssigned WHERE dwBlog.author = dwUsers.id AND isBlog=1 AND dwBlog.post_id = dwTagsAssigned.post_id AND dwTags.tag_id = dwTagsAssigned.tag_id AND dwTags.tag = $1 ORDER BY create_timestamp DESC LIMIT 3";
     auto result = clientPtr->execSqlSync(query, category);
     std::vector<std::string> keywords;
@@ -157,7 +157,7 @@ void Blog::renderCategory(const drogon::HttpRequestPtr& req, std::function<void 
 }
 
 void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback) {
-    auto clientPtr = drogon::app().getDbClient("dwebsite");
+    auto clientPtr = drogon::app().getDbClient();
     std::string query = "SELECT post_id, title, url FROM dwBlog ORDER BY create_timestamp DESC";
     auto result = clientPtr->execSqlSync(query);
     std::vector<std::string> keywords;
@@ -186,7 +186,7 @@ void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (
 
 void Blog::renderHome(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback) {
     std::vector<std::string> keywords;
-    auto clientPtr = drogon::app().getDbClient("dwebsite");
+    auto clientPtr = drogon::app().getDbClient();
     std::string query = "SELECT dwBlog.post_id, dwBlog.url, dwBlog.title, dwBlog.subtitle, dwBlog.content, dwUsers.name, dwBlog.create_timestamp FROM dwBlog, dwUsers WHERE dwBlog.author = dwUsers.id AND isBlog=1 ORDER BY create_timestamp DESC LIMIT 3";
     auto result = clientPtr->execSqlSync(query);
     std::string content, title, tags;
@@ -230,7 +230,7 @@ std::string Blog::getRightSidebar(std::vector<std::string> keywords) {
 }
 
 void Blog::createSitemap() {
-    auto clientPtr = drogon::app().getDbClient("dwebsite");
+    auto clientPtr = drogon::app().getDbClient();
     std::string query = "SELECT url FROM dwBlog";
     clientPtr->execSqlAsync(query, [](const drogon::orm::Result &result) {
         std::ofstream sitemap;
