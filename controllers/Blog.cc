@@ -165,7 +165,7 @@ void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (
     std::string content = "<table id='Archive'><tr><th>Title</th><th>Keywords</th></tr>";
     for (auto row : result) {
         std::string link = "<tr><td><a href='" + helpers::BaseURL + "/Blog/";
-        link.append(row["url"].as<std::string>()).append("'>").append(row["title"].as<std::string>()).append("</a></td><td>");
+        link.append(row["url"].as<std::string>() + "'>" + row["title"].as<std::string>() + "</a></td><td>");
         links[row["post_id"].as<int>()] = link;
     }
     for (auto link : links) {
@@ -174,9 +174,9 @@ void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (
         for (auto row : result) {
             std::string tag = row["tag"].as<std::string>();
             keywords.push_back(tag);
-            link.second.append("<a href='" + helpers::BaseURL + "/Category/").append(tag).append("'>").append(tag).append("</a> ");
+            link.second.append("<a href='" + helpers::BaseURL + "/Category/" + tag + "'>" + tag + "</a> ");
         }
-        content.append(link.second).append("</td></tr>");
+        content.append(link.second + "</td></tr>");
     }
     content.append("</table>");
     content = "<div class='post-container'><h1>Archive</h1><div class='post-content-container'>" + content + "</div>";
@@ -214,20 +214,15 @@ void Blog::renderHome(const drogon::HttpRequestPtr& req, std::function<void (con
 }
 
 std::string Blog::getLeftSidebar() {
-    std::string result = "<div class='left-sidebar'><ul>";
-    result.append("<li><h3><a href='" + helpers::BaseURL + "'>Home</a></h3></li>");
-    result.append("<li><h3><a href='" + helpers::BaseURL + "/Blog/Archive'>Archive</a></h3></li>");
-    result.append("<li><h3><a href='https://spicylesbians.etsy.com'>My Etsy Shop</a></h3></li>");
-    result.append("</ul></div>");
+    std::string result = "<li><h3><a href='" + helpers::BaseURL + "/Blog/Archive'>Archive</a></h3></li>";
     return result;
 }
 
 std::string Blog::getRightSidebar(std::vector<std::string> keywords) {
-    std::string result = "<div class='right-sidebar'><ul>";
+    std::string result = "";
     for (auto tag : keywords) {
-        result.append("<li><a href='" + helpers::BaseURL + "/Category/").append(tag).append("'>").append(tag).append("</a></ul>");
+        result.append("<li><a href='" + helpers::BaseURL + "/Category/" + tag + "'>" + tag + "</a></ul>");
     }
-    result.append("</ul></div>");
     return result;
 }
 

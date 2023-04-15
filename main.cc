@@ -4,17 +4,21 @@
 #include "helpers/helpers.h"
 
 std::string helpers::BaseURL;
+std::string helpers::TablePrefix;
+
+std::string getCustomValue(const Json::Value json, std::string key) {
+    if (!json[key].empty())
+    {
+        return json[key].asString();
+    }
+}
 
 int main() {
     //Load config file
     drogon::app().loadConfigFile("config.json");
-    std::string url;
     auto &json = drogon::app().getCustomConfig();
-    if (!json["base_url"].empty())
-    {
-        url = json["base_url"].asString();
-    }
-    helpers::BaseURL = url;
+    helpers::BaseURL = getCustomValue(json, "base_url");
+    helpers::TablePrefix = getCustomValue(json, "table_prefix");
     LOG_TRACE << helpers::BaseURL;
     //Run HTTP framework,the method will block in the internal event loop
     drogon::app().run();

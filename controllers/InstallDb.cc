@@ -5,13 +5,14 @@
 #include <openssl/sha.h>
 #include <drogon/orm/DbClient.h>
 #include <drogon/HttpTypes.h>
+#include "helpers/helpers.h"
 #include "InstallDb.h"
 #include "Website.h"
 
 void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback)
 {
     std::vector<std::string> keywords;
-    std::string query = "SELECT * FROM dwUsers;";
+    std::string query = "SELECT * FROM " + helpers::TablePrefix + "Users;";
     auto clientPtr = drogon::app().getDbClient();
     bool dbExists = false;
     try {
@@ -43,21 +44,24 @@ void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::f
                 }
                 LOG_TRACE << "param " << key << ", value: " << value;
             }
-            query = "CREATE TABLE IF NOT EXISTS dwBlog (post_id SERIAL PRIMARY KEY, url VARCHAR(255), title VARCHAR(255), subtitle VARCHAR(255), language CHAR(5), content text, author int, isBlog int, create_timestamp timestamp DEFAULT current_timestamp, edit_timestamp timestamp);";
+            query = "CREATE TABLE IF NOT EXISTS " + helpers::TablePrefix + "Blog (post_id SERIAL PRIMARY KEY, url VARCHAR(255), title VARCHAR(255), subtitle VARCHAR(255), language CHAR(5), content text, author int, isBlog int, create_timestamp timestamp DEFAULT current_timestamp, edit_timestamp timestamp);";
             output = "Installing Database....<br>";
             output.append("Creating blog table....<br>");
             auto result = clientPtr->execSqlSync(query);
             output.append(".... done<br>Creating Tags table....<br>");
-            query = "CREATE TABLE IF NOT EXISTS dwTags (tag_id SERIAL PRIMARY KEY, tag VARCHAR(255), description VARCHAR(255));";
+            query = "CREATE TABLE IF NOT EXISTS " + helpers::TablePrefix + "Tags (tag_id SERIAL PRIMARY KEY, tag VARCHAR(255), description VARCHAR(255));";
             result = clientPtr->execSqlSync(query);
             output.append(".... done<br>Creating AssignedTags table....<br>");
-            query = "CREATE TABLE IF NOT EXISTS dwTagsAssigned (tag_id INT, post_id INT);";
+            query = "CREATE TABLE IF NOT EXISTS " + helpers::TablePrefix + "TagsAssigned (tag_id INT, post_id INT);";
             result = clientPtr->execSqlSync(query);
             output.append(".... done<br>Creating users table....<br>");
-            query = "CREATE TABLE IF NOT EXISTS dwUsers (id SERIAL PRIMARY KEY, username VARCHAR(255) UNIQUE, email VARCHAR(255), name VARCHAR(255), token VARCHAR(100), expiration BIGINT, can_post INT, create_timestamp timestamp DEFAULT current_timestamp);";
+            query = "CREATE TABLE IF NOT EXISTS " + helpers::TablePrefix + "Users (id SERIAL PRIMARY KEY, username VARCHAR(255) UNIQUE, email VARCHAR(255), name VARCHAR(255), token VARCHAR(100), expiration BIGINT, can_post INT, create_timestamp timestamp DEFAULT current_timestamp);";
+            result = clientPtr->execSqlSync(query);
+            output.append(".... done<br>Creating categories table ....<br>");
+            query = "CREATE TABLE IF NOT EXISTS " + helpers::TablePrefix + "Categories (id SERIAL PRIMARY KEY, name VARCHAR(255), parent INT, isExternal INT);";
             result = clientPtr->execSqlSync(query);
             output.append(".... done<br>Creating user....<br>");
-            query = "INSERT INTO dwUsers (username, email, name, token, expiration, can_post) VALUES ($1, $2, $3, $4, $5, $6)";
+            query = "INSERT INTO " + helpers::TablePrefix + "Users (username, email, name, token, expiration, can_post) VALUES ($1, $2, $3, $4, $5, $6)";
             std::string password = email + std::to_string(trantor::Date::date().microSecondsSinceEpoch());
             unsigned char hash[SHA512_DIGEST_LENGTH];
             EVP_Digest(password.c_str(),password.size(),hash,NULL,EVP_sha512(),NULL);

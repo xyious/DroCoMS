@@ -4,6 +4,7 @@
 class helpers {
     public:
         static std::string     BaseURL;
+        static std::string     TablePrefix;
 
         static std::vector<std::string> split(std::string input, std::string delimiter) {
             std::vector<std::string> result;
