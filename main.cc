@@ -11,6 +11,7 @@ std::string getCustomValue(const Json::Value json, std::string key) {
     {
         return json[key].asString();
     }
+    return "";
 }
 
 int main() {
