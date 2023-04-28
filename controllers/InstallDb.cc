@@ -58,7 +58,7 @@ void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::f
             query = "CREATE TABLE IF NOT EXISTS " + helpers::TablePrefix + "Users (id SERIAL PRIMARY KEY, username VARCHAR(255) UNIQUE, email VARCHAR(255), name VARCHAR(255), token VARCHAR(100), expiration BIGINT, can_post INT, create_timestamp timestamp DEFAULT current_timestamp);";
             result = clientPtr->execSqlSync(query);
             output.append(".... done<br>Creating categories table ....<br>");
-            query = "CREATE TABLE IF NOT EXISTS " + helpers::TablePrefix + "Categories (id SERIAL PRIMARY KEY, name VARCHAR(255), parent INT, isExternal INT);";
+            query = "CREATE TABLE IF NOT EXISTS " + helpers::TablePrefix + "Categories (id SERIAL PRIMARY KEY, name VARCHAR(255), parent INT, description TEXT, language CHAR(5), isBlog INT, isExternal INT);";
             result = clientPtr->execSqlSync(query);
             output.append(".... done<br>Creating user....<br>");
             query = "INSERT INTO " + helpers::TablePrefix + "Users (username, email, name, token, expiration, can_post) VALUES ($1, $2, $3, $4, $5, $6)";
