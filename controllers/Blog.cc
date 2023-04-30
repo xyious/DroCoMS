@@ -293,7 +293,7 @@ std::string Blog::getRightSidebar(std::vector<std::string> keywords) {
 
 void Blog::createSitemap() {
     auto clientPtr = drogon::app().getDbClient();
-    std::string query = "SELECT url FROM dwBlog";
+    std::string query = "SELECT url FROM " + helpers::TablePrefix + "Blog";
     clientPtr->execSqlAsync(query, [](const drogon::orm::Result &result) {
         std::ofstream sitemap;
         sitemap.open("sitemap.txt", std::ios::out | std::ios::trunc);
