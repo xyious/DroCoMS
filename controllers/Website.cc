@@ -6,7 +6,7 @@ website::website(std::vector<std::string> keywords, std::string languague, std::
     this->keywords = keywords;
     this->language = language;
     this->title = title;
-    this->content = "<div class='content-container'>" + this->content + "</div>";
+    this->content = "<div class='content-container'>" + content + "</div>";
     this->stylesheet = stylesheet;
     this->leftSidebarContent = "<div class='left-sidebar'><ul><li><h3><a href='" + helpers::BaseURL + "'>Home</a></h3></li>" + leftSidebarContent + "<li><h3><a href='https://spicylesbians.etsy.com'>My Etsy Shop</a></h3></li></ul></div>";
     if (rightSidebarContent.empty()) {

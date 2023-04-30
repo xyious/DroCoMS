@@ -3,6 +3,7 @@
 #include <openssl/sha.h>
 #include <trantor/utils/Date.h>
 #include <trantor/utils/Utilities.h>
+#include "helpers/helpers.h"
 #include "User.h"
 #include "Website.h"
 
@@ -30,7 +31,7 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
         return;
     }
     if (token.empty()) {
-        std::string query = "SELECT * FROM dwUsers WHERE email=$1";
+        std::string query = "SELECT * FROM " + helpers::TablePrefix + "Users WHERE email=$1";
         auto clientPtr = drogon::app().getDbClient();
         auto result = clientPtr->execSqlSync(query, email);
         long duration = 0;
@@ -51,7 +52,7 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
         callback(site->getPage());
         return;
     } else {
-        std::string query = "SELECT * FROM dwUsers WHERE email=$1;";
+        std::string query = "SELECT * FROM " + helpers::TablePrefix + "Users WHERE email=$1;";
         auto clientPtr = drogon::app().getDbClient();
         auto result = clientPtr->execSqlSync(query, email);
         if (result.size() > 0) {
@@ -65,6 +66,7 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
                     } else {
                         req->session()->insert("loginTimeout", std::to_string(duration));
                     }
+                    LOG_TRACE << "Logged in";
                     auto site = new website(keywords, "en", "Login", "Logged in....");
                     callback(site->getPage());
                     return;
