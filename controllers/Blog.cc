@@ -9,7 +9,7 @@
 
 void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback) {
     std::vector<std::string> keywords;
-    std::string title, subtitle, tags, content, author, language, isBlog = "0";
+    std::string title, subtitle, tags, content, author, language, isBlog = "0", category;
     if (req->getMethod() == drogon::HttpMethod::Post) {
         auto params = req->getParameters();
         for (auto param : params) {
@@ -30,6 +30,8 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
                 language = value;
             } else if (key == "author") {
                 author = value;
+            } else if (key == "category") {
+                category = value;
             } else if (key == "isBlog") {
                 if (value == "on") {
                     isBlog = "1";
@@ -44,7 +46,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
         std::string url = std::regex_replace(title, std::regex(" "), "-");
         url = std::regex_replace(url, std::regex("[^A-Za-z0-9-_]"), "");
         LOG_TRACE << "Url: " << url << ", Title: " << title << ", Subtitle: " << subtitle << ", Author: " << author << ", Content: " << content;
-        std::string query = "INSERT INTO " + helpers::TablePrefix + "blog (url, title, subtitle, content, isBlog, author, language) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING post_id";
+        std::string query = "INSERT INTO " + helpers::TablePrefix + "blog (url, title, subtitle, content, isBlog, author, language, category) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING post_id";
         try {
             std::string log = "Creating Post !<br>";
             int postId;
@@ -87,13 +89,19 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
         }
     }
     auto clientPtr = drogon::app().getDbClient();
-    std::string query = "SELECT id, name FROM " + helpers::TablePrefix + "users";
+    std::string query = "SELECT id, name FROM " + helpers::TablePrefix + "categories";
     auto result = clientPtr->execSqlSync(query);
-    std::string form = "<form action='' method='post'><label for='title'>Title:</label><input type='text' name='title' value='";
-    form.append(title);
-    form.append("' required><br><label for='subtitle'>Subtitle:</label><input type='text' name='subtitle' value='");
-    form.append(subtitle);
-    form.append("'><br><label for='language'>Language:</label><select name='language'><option value='en-US'>English</option><option value='de-DE'>German</option></select><label for='author'>Author:</label><select name='author'>");
+    std::string form = "<form action='' method='post'><label for='title'>Title:</label><input type='text' name='title' value='" + title +"' required><br><label for='subtitle'>Subtitle:</label><input type='text' name='subtitle' value='" + subtitle + "'><br><label for='category'>Category:</label><select name='category'>";
+    for (auto row : result) {
+        form.append("<option value='");
+        form.append(row["id"].as<std::string>());
+        form.append("'>");
+        form.append(row["name"].as<std::string>());
+        form.append("</option>");
+    }
+    form.append("</select><br><option value='en-US'>English</option><option value='de-DE'>German</option></select><label for='language'>Language:</label><select name='language'><option value='en-US'>English</option><option value='de-DE'>German</option></select><label for='author'>Author:</label><select name='author'>");
+    query = "SELECT id, name FROM " + helpers::TablePrefix + "users";
+    result = clientPtr->execSqlSync(query);
     for (auto row : result) {
         form.append("<option value='");
         form.append(row["id"].as<std::string>());

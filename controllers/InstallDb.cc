@@ -45,7 +45,7 @@ void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::f
                 }
                 LOG_TRACE << "param " << key << ", value: " << value;
             }
-            query = "CREATE TABLE IF NOT EXISTS " + helpers::TablePrefix + "Blog (post_id SERIAL PRIMARY KEY, url VARCHAR(255), title VARCHAR(255), subtitle VARCHAR(255), language CHAR(5), content text, author int, isBlog int, create_timestamp timestamp DEFAULT current_timestamp, edit_timestamp timestamp);";
+            query = "CREATE TABLE IF NOT EXISTS " + helpers::TablePrefix + "Blog (post_id SERIAL PRIMARY KEY, url VARCHAR(255), title VARCHAR(255), subtitle VARCHAR(255), language CHAR(5), content text, author INT, category INT, isBlog INT, create_timestamp timestamp DEFAULT current_timestamp, edit_timestamp timestamp);";
             output = "Installing Database....<br>";
             output.append("Creating blog table....<br>");
             auto result = clientPtr->execSqlSync(query);
@@ -60,6 +60,9 @@ void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::f
             result = clientPtr->execSqlSync(query);
             output.append(".... done<br>Creating categories table ....<br>");
             query = "CREATE TABLE IF NOT EXISTS " + helpers::TablePrefix + "Categories (id SERIAL PRIMARY KEY, name VARCHAR(255), parent INT, description TEXT, language CHAR(5), isBlog INT, isExternal INT);";
+            result = clientPtr->execSqlSync(query);
+            output.append(".... done<br>Creating category....<br>");
+            query = "INSERT INTO " + helpers::TablePrefix + "Categories (name, description, language, isBlog, isExternal) VALUES ('main', 'This is where literally everything goes', 'en-US', 1, 0);";
             result = clientPtr->execSqlSync(query);
             output.append(".... done<br>Creating user....<br>");
             query = "INSERT INTO " + helpers::TablePrefix + "Users (username, email, name, token, expiration, can_post) VALUES ($1, $2, $3, $4, $5, $6)";
