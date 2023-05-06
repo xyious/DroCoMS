@@ -45,12 +45,12 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
         auto clientPtr = drogon::app().getDbClient();
         std::string url = std::regex_replace(title, std::regex(" "), "-");
         url = std::regex_replace(url, std::regex("[^A-Za-z0-9-_]"), "");
-        LOG_TRACE << "Url: " << url << ", Title: " << title << ", Subtitle: " << subtitle << ", Author: " << author << ", Content: " << content;
-        std::string query = "INSERT INTO " + helpers::TablePrefix + "blog (url, title, subtitle, content, isBlog, author, language, category) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING post_id";
+        LOG_TRACE << "Url: " << url << ", Title: " << title << ", Subtitle: " << subtitle << ", Author: " << author << ", Content: " << content << ", Category: " << category;
+        std::string query = "INSERT INTO " + helpers::TablePrefix + "blog (url, title, subtitle, content, isBlog, author, language, category) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING post_id";
         try {
             std::string log = "Creating Post !<br>";
             int postId;
-            auto result = clientPtr->execSqlSync(query, url, title, subtitle, content, isBlog, author, language);
+            auto result = clientPtr->execSqlSync(query, url, title, subtitle, content, isBlog, author, language, category);
             log.append("done .... <br>Adding Tags<br>");
             for (auto row : result) {
                 postId = row["post_id"].as<int>();
@@ -99,7 +99,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
         form.append(row["name"].as<std::string>());
         form.append("</option>");
     }
-    form.append("</select><br><option value='en-US'>English</option><option value='de-DE'>German</option></select><label for='language'>Language:</label><select name='language'><option value='en-US'>English</option><option value='de-DE'>German</option></select><label for='author'>Author:</label><select name='author'>");
+    form.append("</select><label for='language'>Language:</label><select name='language'><option value='en-US'>English</option><option value='de-DE'>German</option></select><label for='author'>Author:</label><select name='author'>");
     query = "SELECT id, name FROM " + helpers::TablePrefix + "users";
     result = clientPtr->execSqlSync(query);
     for (auto row : result) {
