@@ -151,7 +151,7 @@ void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void 
         name = std::regex_replace(name, std::regex(" "), "-");
         name = std::regex_replace(name, std::regex("[^A-Za-z0-9-_]"), "");
         LOG_TRACE << "Name: " << name << ", Description: " << description << ", Parent: " << parent << ", isBlog: " << isBlog;
-        std::string query = "INSERT INTO " + helpers::TablePrefix + "category (name, description, parent, language, isBlog, isExternal) VALUES ($1, $2, $3, $4, $5, $6)";
+        std::string query = "INSERT INTO " + helpers::TablePrefix + "categories (name, description, parent, language, isBlog, isExternal) VALUES ($1, $2, $3, $4, $5, $6)";
         try {
             std::string log = "Creating Category !<br>";
             auto result = clientPtr->execSqlSync(query, name, description, parent, language, isBlog, isExternal);
@@ -179,7 +179,7 @@ void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void 
         form.append(row["name"].as<std::string>());
         form.append("</option>");
     }
-    form.append("</select><br><label for='isBlog'>isBlog ?:</label><input type='checkbox' id='isBlog' name='isBlog' checked><br>label for='isExternal'>isExternal ?:</label><input type='checkbox' id='isExternal' name='isExternal'><form>");
+    form.append("</select><br><label for='isBlog'>isBlog ?:</label><input type='checkbox' id='isBlog' name='isBlog' checked><br><label for='isExternal'>isExternal ?:</label><input type='checkbox' id='isExternal' name='isExternal'><br><input type='submit' value='submit'><form>");
     auto site = new website(keywords, "en-US", "Create Category", form, getLeftSidebar(), getRightSidebar(keywords));
     callback(site->getPage());
     createSitemap();
@@ -188,16 +188,16 @@ void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void 
 
 void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string url) {
     auto clientPtr = drogon::app().getDbClient();
-    std::string query = "SELECT " + helpers::TablePrefix + "Blog.post_id, " + helpers::TablePrefix + "Blog.language, " + helpers::TablePrefix + "Blog.title, " + helpers::TablePrefix + "Blog.subtitle, " + helpers::TablePrefix + "Blog.url, " + helpers::TablePrefix + "Blog.content, " + helpers::TablePrefix + "Users.name, " + helpers::TablePrefix + "Blog.create_timestamp FROM " + helpers::TablePrefix + "Blog, " + helpers::TablePrefix + "Users WHERE " + helpers::TablePrefix + "Blog.author = " + helpers::TablePrefix + "Users.id AND isBlog=1 AND url=$1 ORDER BY create_timestamp DESC LIMIT 1";
+    std::string query = "SELECT " + helpers::TablePrefix + "Blog.post_id, " + helpers::TablePrefix + "Blog.language, " + helpers::TablePrefix + "Blog.title, " + helpers::TablePrefix + "Blog.subtitle, " + helpers::TablePrefix + "Blog.url, " + helpers::TablePrefix + "Blog.content, " + helpers::TablePrefix + "Users.name, to_char(" +  helpers::TablePrefix + "Blog.create_timestamp,'Month DD YYYY') as timestamp FROM " + helpers::TablePrefix + "Blog, " + helpers::TablePrefix + "Users WHERE " + helpers::TablePrefix + "Blog.author = " + helpers::TablePrefix + "Users.id AND isBlog=1 AND url=$1 ORDER BY " + helpers::TablePrefix + "Blog.create_timestamp DESC LIMIT 1";
     auto result = clientPtr->execSqlSync(query, url);
     std::vector<std::string> keywords;
-    int id;
+    unsigned int id;
     std::string language, title, content;
     for (auto row : result) {
         id = row["post_id"].as<int>();
         language = row["language"].as<std::string>();
         title = row["title"].as<std::string>();
-        content = website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), keywords);
+        content = website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["timestamp"].as<std::string>(), keywords);
     }
     query = "SELECT " + helpers::TablePrefix + "Tags.tag_id, " + helpers::TablePrefix + "Tags.tag FROM " + helpers::TablePrefix + "Tags, " + helpers::TablePrefix + "TagsAssigned WHERE " + helpers::TablePrefix + "Tags.tag_id = " + helpers::TablePrefix + "TagsAssigned.tag_id AND " + helpers::TablePrefix + "TagsAssigned.post_id = $1";
     result = clientPtr->execSqlSync(query, id);
@@ -211,12 +211,12 @@ void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (con
 
 void Blog::renderTag(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string tag) {
     auto clientPtr = drogon::app().getDbClient();
-    std::string query = "SELECT " + helpers::TablePrefix + "Blog.language, " + helpers::TablePrefix + "Blog.title, " + helpers::TablePrefix + "Blog.subtitle, " + helpers::TablePrefix + "Blog.url, " + helpers::TablePrefix + "Blog.content, " + helpers::TablePrefix + "Users.name, " + helpers::TablePrefix + "Blog.create_timestamp FROM " + helpers::TablePrefix + "Blog, " + helpers::TablePrefix + "Users, " + helpers::TablePrefix + "Tags, " + helpers::TablePrefix + "TagsAssigned WHERE " + helpers::TablePrefix + "Blog.author = " + helpers::TablePrefix + "Users.id AND isBlog=1 AND " + helpers::TablePrefix + "Blog.post_id = " + helpers::TablePrefix + "TagsAssigned.post_id AND " + helpers::TablePrefix + "Tags.tag_id = " + helpers::TablePrefix + "TagsAssigned.tag_id AND " + helpers::TablePrefix + "Tags.tag = $1 ORDER BY create_timestamp DESC LIMIT 3";
+    std::string query = "SELECT " + helpers::TablePrefix + "Blog.language, " + helpers::TablePrefix + "Blog.title, " + helpers::TablePrefix + "Blog.subtitle, " + helpers::TablePrefix + "Blog.url, " + helpers::TablePrefix + "Blog.content, " + helpers::TablePrefix + "Users.name, to_char(" +  helpers::TablePrefix + "Blog.create_timestamp,'Month DD YYYY') as timestamp FROM " + helpers::TablePrefix + "Blog, " + helpers::TablePrefix + "Users, " + helpers::TablePrefix + "Tags, " + helpers::TablePrefix + "TagsAssigned WHERE " + helpers::TablePrefix + "Blog.author = " + helpers::TablePrefix + "Users.id AND isBlog=1 AND " + helpers::TablePrefix + "Blog.post_id = " + helpers::TablePrefix + "TagsAssigned.post_id AND " + helpers::TablePrefix + "Tags.tag_id = " + helpers::TablePrefix + "TagsAssigned.tag_id AND " + helpers::TablePrefix + "Tags.tag = $1 ORDER BY " + helpers::TablePrefix + "blog.create_timestamp DESC LIMIT 3";
     auto result = clientPtr->execSqlSync(query, tag);
     std::vector<std::string> keywords;
     std::string content, language, title;
     for (auto row : result) {
-        content.append(website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), keywords));
+        content.append(website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["timestamp"].as<std::string>(), keywords));
         if (title.empty()) {
             title = row["title"].as<std::string>();
         }
@@ -231,7 +231,7 @@ void Blog::renderTag(const drogon::HttpRequestPtr& req, std::function<void (cons
 
 void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback) {
     auto clientPtr = drogon::app().getDbClient();
-    std::string query = "SELECT post_id, title, url FROM " + helpers::TablePrefix + "Blog ORDER BY create_timestamp DESC";
+    std::string query = "SELECT post_id, title, url FROM " + helpers::TablePrefix + "Blog ORDER BY " + helpers::TablePrefix + "blog.create_timestamp DESC";
     auto result = clientPtr->execSqlSync(query);
     std::vector<std::string> keywords;
     std::map<int, std::string> links;
@@ -260,24 +260,20 @@ void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (
 void Blog::renderHome(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback) {
     std::vector<std::string> keywords;
     auto clientPtr = drogon::app().getDbClient();
-    std::string query = "SELECT " + helpers::TablePrefix + "Blog.post_id, " + helpers::TablePrefix + "Blog.url, " + helpers::TablePrefix + "Blog.title, " + helpers::TablePrefix + "Blog.subtitle, " + helpers::TablePrefix + "Blog.content, " + helpers::TablePrefix + "Users.name, " + helpers::TablePrefix + "Blog.create_timestamp FROM " + helpers::TablePrefix + "Blog, " + helpers::TablePrefix + "Users WHERE " + helpers::TablePrefix + "Blog.author = " + helpers::TablePrefix + "Users.id AND isBlog=1 ORDER BY create_timestamp DESC LIMIT 3";
+    std::string query = "SELECT " + helpers::TablePrefix + "Blog.post_id, " + helpers::TablePrefix + "Blog.url, " + helpers::TablePrefix + "Blog.title, " + helpers::TablePrefix + "Blog.subtitle, " + helpers::TablePrefix + "Blog.content, " + helpers::TablePrefix + "Users.name, to_char(" +  helpers::TablePrefix + "Blog.create_timestamp,'Month DD YYYY') as timestamp FROM " + helpers::TablePrefix + "Blog, " + helpers::TablePrefix + "Users WHERE " + helpers::TablePrefix + "Blog.author = " + helpers::TablePrefix + "Users.id AND isBlog=1 ORDER BY " + helpers::TablePrefix + "Blog.create_timestamp DESC LIMIT 3";
     auto result = clientPtr->execSqlSync(query);
-    std::string content, title, tags;
-    std::vector<int> ids;
+    std::string content, title;
+    std::vector<unsigned int> ids, tags;
     for (auto row : result) {
         if (title.empty()) {
             title = row["title"].as<std::string>();
         }
-        content.append(website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["create_timestamp"].as<std::string>(), keywords));
-        ids.push_back(row["post_id"].as<int>());
+        content.append(website::getPost(row["url"].as<std::string>(), row["title"].as<std::string>(), row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["timestamp"].as<std::string>(), keywords));
+        ids.push_back(row["post_id"].as<unsigned int>());
     }
     if (ids.size() > 0) {
         query = "SELECT " + helpers::TablePrefix + "Tags.tag FROM " + helpers::TablePrefix + "Tags, " + helpers::TablePrefix + "TagsAssigned WHERE " + helpers::TablePrefix + "Tags.tag_id = " + helpers::TablePrefix + "TagsAssigned.tag_id AND " + helpers::TablePrefix + "TagsAssigned.post_id IN ($1)";
-        for (auto val : ids) {
-            tags += std::to_string(val) + ", ";
-        }
-        tags = tags.substr(0, tags.size() - 2);
-        result = clientPtr->execSqlSync(query, tags);
+        result = clientPtr->execSqlSync(query, ids.front());
         for (auto row : result) {
             keywords.push_back(row["tag"].as<std::string>());
         }

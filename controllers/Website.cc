@@ -1,3 +1,5 @@
+#include <iomanip>
+
 #include "Website.h"
 #include "helpers/helpers.h"
 #include "../helpers/Constants.h"
@@ -41,13 +43,14 @@ std::string website::getStyleTag(std::string path = "") {
 }
 
 std::string website::getPost(std::string url, std::string title, std::string subtitle, std::string content, std::string author, std::string timestamp, std::vector<std::string> tags) {
+    LOG_TRACE << timestamp;
     std::string result = "<div class='post-container'><a href='" + helpers::BaseURL + "/Blog/";
     result.append(url + "'><h1>" + title + "</a></h1>");
     if (!subtitle.empty()) {
         result.append("<h4>" + subtitle + "</h4>");
     }
     result.append("<div class='post-content-container'>" + content);
-    result.append("</div><div class='post-info-container'><div class='post-time'>Posted: " + timestamp + "</div><div class='author-info'> by " + author + "</div></div></div>");
+    result.append("</div><div class='post-info-container'><div class='post-time'>Posted: on " + timestamp + "</div><div class='author-info'> by " + author + "</div></div></div>");
     return result;
 }
 
@@ -59,7 +62,7 @@ std::shared_ptr<drogon::HttpResponse> website::getPage() {
     } else {
         this->page.append(HTMLTAGEN);
     }
-    this->page.append(getTitleTag() + getStyleTag() + BODYTAG + this->leftSidebarContent + this->rightSidebarContent + this->content + ENDTAG);
+    this->page.append("<script async src='https://www.googletagmanager.com/gtag/js?id=" + helpers::AnalyticsId + "'></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '" + helpers::AnalyticsId + "');</script>" + getTitleTag() + getStyleTag() + BODYTAG + this->leftSidebarContent + this->rightSidebarContent + this->content + ENDTAG);
     resp->setBody(this->page);
     return resp;
 }
