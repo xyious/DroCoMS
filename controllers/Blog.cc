@@ -181,9 +181,8 @@ void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void 
     }
     form.append("</select><br><label for='isBlog'>isBlog ?:</label><input type='checkbox' id='isBlog' name='isBlog' checked><br><label for='isExternal'>isExternal ?:</label><input type='checkbox' id='isExternal' name='isExternal'><br><input type='submit' value='submit'><form>");
     auto site = new website(keywords, "en-US", "Create Category", form, getLeftSidebar(), getRightSidebar(keywords));
-    callback(site->getPage());
     createSitemap();
-    return;
+    callback(site->getPage());
 }
 
 void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string url) {
@@ -206,7 +205,6 @@ void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (con
     }
     auto site = new website(keywords, language, title, content, getLeftSidebar(), getRightSidebar(keywords));
     callback(site->getPage());
-    return;
 }
 
 void Blog::renderTag(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string tag) {
@@ -226,7 +224,6 @@ void Blog::renderTag(const drogon::HttpRequestPtr& req, std::function<void (cons
     }
     auto site = new website(keywords, language, title, content, getLeftSidebar(), getRightSidebar(keywords));
     callback(site->getPage());
-    return;
 }
 
 void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback) {
@@ -242,7 +239,7 @@ void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (
         links[row["post_id"].as<int>()] = link;
     }
     for (auto link : links) {
-        query = "SELECT dwtags.tag FROM " + helpers::TablePrefix + "Tags, " + helpers::TablePrefix + "TagsAssigned WHERE " + helpers::TablePrefix + "Tags.tag_id = " + helpers::TablePrefix + "TagsAssigned.tag_id AND " + helpers::TablePrefix + "TagsAssigned.post_id = $1";
+        query = "SELECT " + helpers::TablePrefix + "tags.tag FROM " + helpers::TablePrefix + "Tags, " + helpers::TablePrefix + "TagsAssigned WHERE " + helpers::TablePrefix + "Tags.tag_id = " + helpers::TablePrefix + "TagsAssigned.tag_id AND " + helpers::TablePrefix + "TagsAssigned.post_id = $1";
         auto result = clientPtr->execSqlSync(query, link.first);
         for (auto row : result) {
             std::string tag = row["tag"].as<std::string>();
@@ -297,7 +294,7 @@ std::string Blog::getRightSidebar(std::vector<std::string> keywords) {
 
 void Blog::createSitemap() {
     auto clientPtr = drogon::app().getDbClient();
-    std::string query = "SELECT url FROM " + helpers::TablePrefix + "Blog";
+    std::string query = "SELECT url FROM " + helpers::TablePrefix + "blog";
     clientPtr->execSqlAsync(query, [](const drogon::orm::Result &result) {
         std::ofstream sitemap;
         sitemap.open("sitemap.txt", std::ios::out | std::ios::trunc);
@@ -309,5 +306,4 @@ void Blog::createSitemap() {
     [](const drogon::orm::DrogonDbException &e) {
         LOG_ERROR << "Exception in blog.cc: " << e.base().what();
     });
-    return;
 }
