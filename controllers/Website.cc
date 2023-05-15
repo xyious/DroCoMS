@@ -4,13 +4,40 @@
 #include "helpers/helpers.h"
 #include "../helpers/Constants.h"
 
-website::website(std::vector<std::string> keywords, std::string languague, std::string title, std::string content, std::string leftSidebarContent, std::string rightSidebarContent, std::string stylesheet) {
+website::website(std::vector<std::string> keywords, std::string language, std::string title, std::string content, std::string leftSidebarContent, std::string rightSidebarContent, std::string stylesheet) {
     this->keywords = keywords;
     this->language = language;
     this->title = title;
     this->content = "<div class='content-container'>" + content + "</div>";
     this->stylesheet = stylesheet;
-    this->leftSidebarContent = "<div class='left-sidebar'><ul><li><h3><a href='" + helpers::BaseURL + "'>Home</a></h3></li>" + leftSidebarContent + "<li><h3><a href='https://spicylesbians.etsy.com'>My Etsy Shop</a></h3></li></ul></div>";
+    this->leftSidebarContent = "<div class='left-sidebar'><ul><li><h3><a href='" + helpers::BaseURL + "'>Home</a></h3></li>" + leftSidebarContent + "</ul></div>";
+    if (rightSidebarContent.empty()) {
+        rightSidebarContent = "&nbsp;";
+    } else {
+        rightSidebarContent = "<ul>" + rightSidebarContent + "</ul>";
+    }
+    this->rightSidebarContent = "<div class='right-sidebar'>" + rightSidebarContent + "</div>";
+}
+
+website::website() {}
+
+void website::setContent(std::string content) {
+    this->content = "<div class='content-container'>" + content + "</div>";
+}
+
+void website::setLanguage(std::string language) {
+    this->language = language;
+}
+
+void website::setTitle(std::string title) {
+    this->title = title;
+}
+
+void website::setLeftSidebarContent(std::string content) {
+    this->leftSidebarContent = "<div class='left-sidebar'><ul><li><h3><a href='" + helpers::BaseURL + "'>Home</a></h3></li>" + leftSidebarContent + "</ul></div>";
+}
+
+void website::setRightSidebarContent(std::string content) {
     if (rightSidebarContent.empty()) {
         rightSidebarContent = "&nbsp;";
     } else {
@@ -42,8 +69,7 @@ std::string website::getStyleTag(std::string path = "") {
     return result;
 }
 
-std::string website::getPost(std::string url, std::string title, std::string subtitle, std::string content, std::string author, std::string timestamp, std::vector<std::string> tags) {
-    LOG_TRACE << timestamp;
+std::string website::getPost(std::string url, std::string title, std::string subtitle, std::string content, std::string author, std::string timestamp) {
     std::string result = "<div class='post-container'><a href='" + helpers::BaseURL + "/Blog/";
     result.append(url + "'><h1>" + title + "</a></h1>");
     if (!subtitle.empty()) {
@@ -63,6 +89,7 @@ std::shared_ptr<drogon::HttpResponse> website::getPage() {
         this->page.append(HTMLTAGEN);
     }
     this->page.append("<script async src='https://www.googletagmanager.com/gtag/js?id=" + helpers::AnalyticsId + "'></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '" + helpers::AnalyticsId + "');</script>" + getTitleTag() + getStyleTag() + BODYTAG + this->leftSidebarContent + this->rightSidebarContent + this->content + ENDTAG);
+    resp->setStatusCode(drogon::HttpStatusCode::k200OK);
     resp->setBody(this->page);
     return resp;
 }
