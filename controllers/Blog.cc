@@ -84,6 +84,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
             log.append("done");
             auto site = new website(keywords, "en", "Creating Post !", log, getLeftSidebar(), getRightSidebar(keywords));
             callback(site->getPage());
+            createSitemap();
             return;
         }
         catch (std::exception const& e) {
@@ -118,8 +119,6 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
     form.append("</textarea><br><input type='submit' value='submit'><form>");
     auto site = new website(keywords, "en-US", "Create Post", form, getLeftSidebar(), getRightSidebar(keywords));
     callback(site->getPage());
-    createSitemap();
-    return;
 }
 
 void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback) {
@@ -160,6 +159,7 @@ void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void 
             log.append("done .... ");
             auto site = new website(keywords, "en", "Creating Category !", log, getLeftSidebar(), getRightSidebar(keywords));
             callback(site->getPage());
+            createSitemap();
             return;
         }
         catch (std::exception const& e) {
@@ -183,7 +183,6 @@ void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void 
     }
     form.append("</select><br><label for='isBlog'>isBlog ?:</label><input type='checkbox' id='isBlog' name='isBlog' checked><br><label for='isExternal'>isExternal ?:</label><input type='checkbox' id='isExternal' name='isExternal'><br><input type='submit' value='submit'><form>");
     auto site = new website(keywords, "en-US", "Create Category", form, getLeftSidebar(), getRightSidebar(keywords));
-    createSitemap();
     callback(site->getPage());
 }
 
@@ -259,10 +258,10 @@ void Blog::parseResults(const drogon::orm::Result &result, website *site) {
         language = row["language"].as<std::string>();
         ids.push_back(row["post_id"].as<unsigned int>());
         content.append(website::getPost(row["url"].as<std::string>(), title, row["subtitle"].as<std::string>(), row["content"].as<std::string>(), row["name"].as<std::string>(), row["timestamp"].as<std::string>()));
-        if (!title.empty()) {
+        if (!title.empty() && site->getTitle().empty()) {
             site->setTitle(title);
         }
-        if (!language.empty()) {
+        if (!language.empty() && site->getLanguage().empty()) {
             site->setLanguage(language);
         }
     }
@@ -287,8 +286,20 @@ std::vector<std::string> Blog::getKeywords(std::vector<unsigned int> &ids) {
 }
 
 std::string Blog::getLeftSidebar() {
-    std::string result = "<li><h3><a href='" + helpers::BaseURL + "/Blog/Archive'>Archive</a></h3></li>";
-    return result;
+    auto clientPtr = drogon::app().getDbClient();
+    auto query = "SELECT name, description, isBlog, isExternal FROM " + helpers::TablePrefix + "categories WHERE parent IS NOT null";
+    auto result = clientPtr->execSqlSync(query);
+    std::string sidebar = "";
+    for (auto row : result) {
+        std::string name = row["name"].as<std::string>();
+        if (row["isExternal"].as<int>() != 1) {
+            sidebar.append("<li><h4><a href='" + helpers::BaseURL + "/Category/" + name + "'>" + name + "</a></h4></li>");
+        } else {
+            sidebar.append("<li><h4><a href='" + row["description"].as<std::string>() + "'>" + name + "</a></h4></li>");
+        }
+    }
+    sidebar += "<li><h4><a href='" + helpers::BaseURL + "/Blog/Archive'>Archive</a></h4></li>";
+    return sidebar;
 }
 
 std::string Blog::getRightSidebar(std::vector<std::string> keywords) {
@@ -302,16 +313,16 @@ std::string Blog::getRightSidebar(std::vector<std::string> keywords) {
 void Blog::createSitemap() {
     auto clientPtr = drogon::app().getDbClient();
     std::string query = "SELECT url FROM " + helpers::TablePrefix + "blog";
-    std::string baseUrl = helpers::BaseURL;
-    clientPtr->execSqlAsync(query, [baseUrl](const drogon::orm::Result &result) {
-        std::ofstream sitemap;
-        sitemap.open("sitemap.txt", std::ios::out | std::ios::trunc);
-        for (auto row : result) {
-            sitemap << baseUrl << "/" << row["url"].as<std::string>() << std::endl;
-        }
-        sitemap.close();
-    },
-    [](const drogon::orm::DrogonDbException &e) {
-        LOG_ERROR << "Exception in blog.cc: " << e.base().what();
-    });
+    auto result = clientPtr->execSqlSync(query);
+    std::ofstream sitemap;
+    sitemap.open("sitemap.txt", std::ios::out | std::ios::trunc);
+    for (auto row : result) {
+        sitemap << helpers::BaseURL << "/" << row["url"].as<std::string>() << std::endl;
+    }
+    query = "SELECT name, description, isExternal from " + helpers::TablePrefix + "categories WHERE parent IS NOT null AND isExternal = 0";
+    result = clientPtr->execSqlSync(query);
+    for (auto row : result) {
+        sitemap << helpers::BaseURL << "/Category/" << row["name"].as<std::string>() << std::endl;
+    }
+    sitemap.close();
 }

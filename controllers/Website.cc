@@ -8,15 +8,10 @@ website::website(std::vector<std::string> keywords, std::string language, std::s
     this->keywords = keywords;
     this->language = language;
     this->title = title;
-    this->content = "<div class='content-container'>" + content + "</div>";
     this->stylesheet = stylesheet;
-    this->leftSidebarContent = "<div class='left-sidebar'><ul><li><h3><a href='" + helpers::BaseURL + "'>Home</a></h3></li>" + leftSidebarContent + "</ul></div>";
-    if (rightSidebarContent.empty()) {
-        rightSidebarContent = "&nbsp;";
-    } else {
-        rightSidebarContent = "<ul>" + rightSidebarContent + "</ul>";
-    }
-    this->rightSidebarContent = "<div class='right-sidebar'>" + rightSidebarContent + "</div>";
+    this->setLeftSidebarContent(leftSidebarContent);
+    this->setRightSidebarContent(rightSidebarContent);
+    this->setContent(content);
 }
 
 website::website() {}
@@ -25,8 +20,16 @@ void website::setContent(std::string content) {
     this->content = "<div class='content-container'>" + content + "</div>";
 }
 
+std::string website::getLanguage() {
+    return this->language;
+}
+
 void website::setLanguage(std::string language) {
     this->language = language;
+}
+
+std::string website::getTitle() {
+    return this->title;
 }
 
 void website::setTitle(std::string title) {
@@ -34,7 +37,8 @@ void website::setTitle(std::string title) {
 }
 
 void website::setLeftSidebarContent(std::string content) {
-    this->leftSidebarContent = "<div class='left-sidebar'><ul><li><h3><a href='" + helpers::BaseURL + "'>Home</a></h3></li>" + leftSidebarContent + "</ul></div>";
+    LOG_TRACE << "left sidebar: " << content;
+    this->leftSidebarContent = "<nav class='left-sidebar'><ul><li><h3><a href='" + helpers::BaseURL + "'>Home</a></h3></li>" + content + "</ul></nav>";
 }
 
 void website::setRightSidebarContent(std::string content) {
@@ -44,14 +48,6 @@ void website::setRightSidebarContent(std::string content) {
         rightSidebarContent = "<ul>" + rightSidebarContent + "</ul>";
     }
     this->rightSidebarContent = "<div class='right-sidebar'>" + rightSidebarContent + "</div>";
-}
-
-std::string website::getTitle() {
-    return this->title;
-}
-
-std::string website::getLanguage() {
-    return this->language;
 }
 
 std::string website::getTitleTag() {
