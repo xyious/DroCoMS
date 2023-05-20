@@ -149,8 +149,6 @@ void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void 
             }
         }
         auto clientPtr = drogon::app().getDbClient();
-        name = std::regex_replace(name, std::regex(" "), "-");
-        name = std::regex_replace(name, std::regex("[^A-Za-z0-9-_]"), "");
         LOG_TRACE << "Name: " << name << ", Description: " << description << ", Parent: " << parent << ", isBlog: " << isBlog;
         std::string query = "INSERT INTO " + helpers::TablePrefix + "categories (name, description, parent, language, isBlog, isExternal) VALUES ($1, $2, $3, $4, $5, $6)";
         try {
@@ -197,7 +195,7 @@ void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (con
 
 void Blog::renderCategory(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string category) {
     auto clientPtr = drogon::app().getDbClient();
-    std::string query = "SELECT " + helpers::TablePrefix + "Blog.language, " + helpers::TablePrefix + "Blog.title, " + helpers::TablePrefix + "Blog.subtitle, " + helpers::TablePrefix + "Blog.url, " + helpers::TablePrefix + "Blog.content, " + helpers::TablePrefix + "Users.name, to_char(" +  helpers::TablePrefix + "Blog.create_timestamp,'Month DD YYYY') as timestamp FROM " + helpers::TablePrefix + "Blog, " + helpers::TablePrefix + "Users, " + helpers::TablePrefix + "Tags, " + helpers::TablePrefix + "TagsAssigned WHERE " + helpers::TablePrefix + "Blog.author = " + helpers::TablePrefix + "Users.id AND isBlog=1 AND " + helpers::TablePrefix + "Blog.category = " + helpers::TablePrefix + "categories.id AND "  + helpers::TablePrefix + "categories.name = $1 ORDER BY " + helpers::TablePrefix + "blog.create_timestamp DESC LIMIT 3";
+    std::string query = "SELECT " + helpers::TablePrefix + "Blog.language, " + helpers::TablePrefix + "Blog.title, " + helpers::TablePrefix + "Blog.subtitle, " + helpers::TablePrefix + "Blog.url, " + helpers::TablePrefix + "Blog.content, " + helpers::TablePrefix + "Users.name, to_char(" +  helpers::TablePrefix + "Blog.create_timestamp,'Month DD YYYY') as timestamp FROM " + helpers::TablePrefix + "Blog, " + helpers::TablePrefix + "Users, " + helpers::TablePrefix + "Tags, " + helpers::TablePrefix + "TagsAssigned, " + helpers::TablePrefix + "Categories WHERE " + helpers::TablePrefix + "Blog.author = " + helpers::TablePrefix + "Users.id AND " + helpers::TablePrefix + "Blog.isBlog=1 AND " + helpers::TablePrefix + "Blog.category = " + helpers::TablePrefix + "categories.id AND "  + helpers::TablePrefix + "categories.name = $1 ORDER BY " + helpers::TablePrefix + "blog.create_timestamp DESC LIMIT 3";
     auto result = clientPtr->execSqlSync(query, category);
     auto site = new website();
     parseResults(result, site);

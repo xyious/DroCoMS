@@ -1,85 +1,176 @@
+@import url('https://fonts.googleapis.com/css2?family=Sriracha&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nova+Square&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani&display=swap');
+@font-face {
+    font-family: Galactico;
+    src: url("Galactico-Basic.otf")
+}
+
+* {
+    font-family: "Nova Square";
+    text-align: center;
+}
+
 body {
     color: #EEBBFF;
-    background-color: #110024;
+    background-color: #000000;
+    min-height: 100vh;
 }
 
 a:link {
-    color: #FFFFFF;
+    color: #f7dbff;
+    transition: color 0.2s;
 }
 
 a:visited {
-    color: #EEBBFF;
+    color: #de7bff;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: #a66eff;
 }
 
 h1 {
-    text-align: center;
     font-weight: bold;
+    font-family: "Sriracha";
+    margin-bottom: -1vh;
 }
 
-h4 {
-    text-align: center;
+hr {
+    background-color: #330046;
+    border: none;
+    height: 0.27vh;
+    width: 99%;
+}
+
+ul {
+    position: relative;
+    bottom: 1vh;
+}
+
+li {
+    text-align: left;
+}
+
+p {
+    text-align: justify;
+}
+
+.left-sidebar {
+    font-size: 1.5em;
+    background-color: #110024;
+    width: 10%;
+    position: fixed;
+    padding-top: 2%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    border-end-end-radius: 2em;
 }
 
 .content-container {
     position: absolute;
     left: 11%;
-    right: 11%;
-    top: 0px;
-}
-
-.left-sidebar {
-    background-color: #000000;
-    width: 10%;
-    position: absolute;
-    padding-top: 2%;
-    overflow: hidden;
-    border-radius: 25px;
-    left: 0px;
-    top: 0px;
-    bottom: 0px;
-    text-align: center;
-}
-
-.right-sidebar {
-    background-color: #000000;
-    width: 10%;
-    position: absolute;
-    overflow: hidden;
-    padding-top: 2%;
-    border-radius: 25px;
-    right: 0px;
-    top: 0px;
-    bottom: 0px;
+    right: 10%;
+    top: 6%;
 }
 
 .post-container {
     width: 96%;
-    padding: 0 2%;
-    text-align: justify;
-    background-color: #000000;
-    border-radius: 25px;
-}
-
-.post-info-container {
-    font-size: smaller;
-    width: 90%;
-    padding: 10px 5% 0px 5%;
-    display: table;
+    padding: 0 1.5% 1.5%;
+    margin: 1em;
+    margin-bottom: -1vh;
+    background-color: #110024;
+    border-radius: 2em;
 }
 
 .post-time {
-    text-align: left;
-    width: 50%;
-    display: table-cell;
+    font-family: monospace;
+    text-decoration: underline #110024 !important;
+    margin-top: 1vh;
 }
 
-.author-info {
-    text-align: right;
-    width: 50%;
-    display: table-cell;
+.tags-box {
+    position: relative;
+    left: 2vw;
+    text-align: left;
+    text-underline-offset: 0.25vh;
+    font-size: 1.25em;
+    width: fit-content;
 }
 
-#Archive {
-    width: 100%;
+#tag-search-div {
+    position: relative;
+    bottom: 2vh;
+}
+
+#tag-search {
     text-align: left;
+    font-size: 1.4rem;
+    color: #f7dbff;
+    border: none;
+    border-radius: 0.5vh;
+    background-color: #330046;
+    max-width: 85%;
+    height: 5vh;
+    margin: 1vh 0;
+}
+
+#tag-search:focus {
+    border: 0.15em solid #f7dbff;
+    outline: none;
+}
+
+#submit {
+    font-size: 1.4rem;
+    color: #f7dbff;
+    background-color: #330046;
+    border: none;
+    border-radius: 0.5vh;
+    transition: transform 0.2s;
+}
+
+#submit:focus {
+    border: 0.15em solid #f7dbff;    
+    outline: none;
+}
+
+#submit:active {
+    transform: scale(1.1);
+}
+
+#right-text-holder {
+    width: 10%;
+    position: absolute;
+    padding-top: 2%;
+    overflow: hidden;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+#right-text {
+    font-size: 4vw;
+    font-family: "Galactico";
+    color: #330046;
+    writing-mode: vertical-lr;
+    position: absolute;
+    top: 6%;
+    right: 10%;
+}
+
+#title {
+    font-family: "Rajdhani";
+    letter-spacing: 0.05em;
+    color: #de7bff;
+    text-shadow: 0.05em 0 0.25em #bb00ff;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+#last-post {
+    margin-bottom: 1em;
 }
