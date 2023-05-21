@@ -37,18 +37,6 @@ h1 {
     margin-bottom: -1vh;
 }
 
-hr {
-    background-color: #330046;
-    border: none;
-    height: 0.27vh;
-    width: 99%;
-}
-
-ul {
-    position: relative;
-    bottom: 1vh;
-}
-
 li {
     text-align: left;
 }

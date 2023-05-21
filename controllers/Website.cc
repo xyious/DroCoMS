@@ -42,10 +42,10 @@ void website::setLeftSidebarContent(std::string content) {
 }
 
 void website::setRightSidebarContent(std::string content) {
-    if (rightSidebarContent.empty()) {
-        rightSidebarContent = "&nbsp;";
+    if (content.empty()) {
+        content = "&nbsp;";
     } else {
-        rightSidebarContent = "<ul>" + rightSidebarContent + "</ul>";
+        content = "<ul>" + content + "</ul>";
     }
     this->rightSidebarContent = "<div class='right-sidebar'>" + rightSidebarContent + "</div>";
 }
