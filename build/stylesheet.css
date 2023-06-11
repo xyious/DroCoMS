@@ -6,15 +6,12 @@
     src: url("Galactico-Basic.otf")
 }
 
-* {
-    font-family: "Nova Square";
-    text-align: center;
-}
-
 body {
     color: #EEBBFF;
     background-color: #000000;
     min-height: 100vh;
+    font-family: "Nova Square";
+    text-align: center;
 }
 
 a:link {
@@ -54,14 +51,26 @@ p {
     top: 0;
     bottom: 0;
     left: 0;
-    border-end-end-radius: 2em;
+    border-radius: 0 2em 2em 0;
+}
+
+.right-sidebar {
+    font-size: 1.5em;
+    background-color: #110024;
+    width: 10%;
+    position: fixed;
+    padding-top: 2%;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    border-radius: 2em 0 0 2em;
 }
 
 .content-container {
     position: absolute;
     left: 11%;
-    right: 10%;
-    top: 6%;
+    right: 11%;
+    top: 0;
 }
 
 .post-container {
@@ -73,92 +82,22 @@ p {
     border-radius: 2em;
 }
 
+.post-info-container {
+    font-size: smaller;
+    width: 90%;
+    padding: 10px 5% 0px 5%;
+    display: table;
+}
+
 .post-time {
+    text-align: left;
+    width: 50%;
+    display: table-cell;
     font-family: monospace;
-    text-decoration: underline #110024 !important;
-    margin-top: 1vh;
 }
 
-.tags-box {
-    position: relative;
-    left: 2vw;
-    text-align: left;
-    text-underline-offset: 0.25vh;
-    font-size: 1.25em;
-    width: fit-content;
-}
-
-#tag-search-div {
-    position: relative;
-    bottom: 2vh;
-}
-
-#tag-search {
-    text-align: left;
-    font-size: 1.4rem;
-    color: #f7dbff;
-    border: none;
-    border-radius: 0.5vh;
-    background-color: #330046;
-    max-width: 85%;
-    height: 5vh;
-    margin: 1vh 0;
-}
-
-#tag-search:focus {
-    border: 0.15em solid #f7dbff;
-    outline: none;
-}
-
-#submit {
-    font-size: 1.4rem;
-    color: #f7dbff;
-    background-color: #330046;
-    border: none;
-    border-radius: 0.5vh;
-    transition: transform 0.2s;
-}
-
-#submit:focus {
-    border: 0.15em solid #f7dbff;    
-    outline: none;
-}
-
-#submit:active {
-    transform: scale(1.1);
-}
-
-#right-text-holder {
-    width: 10%;
-    position: absolute;
-    padding-top: 2%;
-    overflow: hidden;
-    right: 0;
-    top: 0;
-    bottom: 0;
-}
-
-#right-text {
-    font-size: 4vw;
-    font-family: "Galactico";
-    color: #330046;
-    writing-mode: vertical-lr;
-    position: absolute;
-    top: 6%;
-    right: 10%;
-}
-
-#title {
-    font-family: "Rajdhani";
-    letter-spacing: 0.05em;
-    color: #de7bff;
-    text-shadow: 0.05em 0 0.25em #bb00ff;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-}
-
-#last-post {
-    margin-bottom: 1em;
+.author-info {
+    text-align: right;
+    width: 50%;
+    display: table-cell;
 }
