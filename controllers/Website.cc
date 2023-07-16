@@ -84,6 +84,9 @@ std::shared_ptr<drogon::HttpResponse> website::getPage() {
     } else {
         this->page.append(HTMLTAGEN);
     }
+    if (this->content.find("markdown-content") > 0) {
+        this->page.append("<script src='/markdown.js'></script>");
+    }
     this->page.append("<script async src='https://www.googletagmanager.com/gtag/js?id=" + helpers::AnalyticsId + "'></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '" + helpers::AnalyticsId + "');</script>" + getTitleTag() + getStyleTag() + BODYTAG + this->leftSidebarContent + this->rightSidebarContent + this->content + ENDTAG);
     resp->setStatusCode(drogon::HttpStatusCode::k200OK);
     resp->setBody(this->page);

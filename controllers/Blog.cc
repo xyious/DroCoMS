@@ -25,9 +25,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
             } else if (key == "tags") {
                 tags = value;
             } else if (key == "content") {
-                value = std::regex_replace(value, std::regex("\\r\\n\\r\\n"), "</p><br><p>");
-                value = std::regex_replace(value, std::regex("\\r\\n"), "</p><p>");
-                content = "<p>" + value + "</p>";
+                content = value;
             } else if (key == "language") {
                 language = value;
             } else if (key == "author") {
@@ -102,7 +100,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
         form.append(row["name"].as<std::string>());
         form.append("</option>");
     }
-    form.append("</select><label for='language'>Language:</label><select name='language'><option value='en-US'>English</option><option value='de-DE'>German</option></select><label for='author'>Author:</label><select name='author'>");
+    form.append("</select><br><label for='language'>Language:</label><select name='language'><option value='en-US'>English</option><option value='de-DE'>German</option></select><br><label for='author'>Author:</label><select name='author'>");
     query = "SELECT id, name FROM " + helpers::TablePrefix + "users";
     result = clientPtr->execSqlSync(query);
     for (auto row : result) {
@@ -113,10 +111,9 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
         form.append("</option>");
     }
     form.append("</select><br><label for='isBlog'>isBlog ?:</label><input type='checkbox' id='isBlog' name='isBlog' checked><br><label for='tags'>Tags:</label><input type='text' name='tags' value='");
-    form.append(tags);
-    form.append("'><br><label for='content'>Content:</label><textarea name='content' cols='128' rows='50'>");
-    form.append(content);
-    form.append("</textarea><br><input type='submit' value='submit'><form>");
+    form.append(tags +"'><br><label for='content'>Content:</label><textarea name='content' cols='128' rows='50'>");
+    form.append(content +"</textarea id='markdown-content'><br><input type='submit' value='submit'><form><br>");
+    form.append("<div id='preview'></div>");
     std::unique_ptr<website> site(new website(keywords, "en-US", "Create Post", form, getLeftSidebar(), getRightSidebar(keywords)));
     callback(site->getPage());
 }

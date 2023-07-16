@@ -42,6 +42,14 @@ p {
     text-align: justify;
 }
 
+form {
+    text-align: left;
+}
+
+#preview {
+    text-align:justify;
+}
+
 .left-sidebar {
     font-size: 1.5em;
     background-color: #110024;
