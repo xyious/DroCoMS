@@ -10,20 +10,24 @@ class Preview {
     get() {
         return this.html;
     }
-    addLine(text, ul = false, ol = 0) {
+    addLine(text, ul, ol) {
         if (this.ul == false && ul == true) {
             text = "<ul>" + text;
-            this.html += text;
             this.ul = true;
         }
-        if (this.ol == 0 && ol == 1) {
-            text = "<ol>" + text;
-            this.html += text;
-            this.ol = 1;
-        }
         if (this.ol == ol - 1) {
-            this.html += text;
+            if (this.ol == 0) {
+                text = "<ol>" + text;
+            }
             this.ol += 1;
+        }
+        if (this.ul && ul == false) {
+            this.ul = false;
+            text = "</ul>" + text;
+        }
+        if (this.ol > 0 && ol == 0) {
+            this.ol = 0;
+            text = "</ol>" + text;
         }
         this.html += text;
     }
@@ -37,6 +41,8 @@ class Preview {
     }
     reset() {
         this.html = "";
+        this.ol = 0;
+        this.ul = false;
     }
 }
 
@@ -67,20 +73,39 @@ function queueUpdate() {
 function parseLine(line) {
     let ul = false;
     let ol = 0;
+    let h = false;
     console.log(line);
-    if (line.match(/\B\[([^\[\]]+)\]\(([^\)]+)\)\B/)) {
-        line = line.replace(/\B\[([^\[\]]+)\]\(([^\)]+)\)\B/g, getLink);
-    }
+    // First we need to worry about everything that doesn't interfere with 
+    // creating paragraphs (things that end up inside either paragraph or list or h1, etc.
+    line = line.replace(/\B\[([^\[\]]+)\]\(([^\)]+)\)\B/g, getLink);
+    line = line.replace(/\*\*([^\*]+)\*\*/g, "<b>$1</b>");
+    line = line.replace(/\*([^\*]+)\*/g, "<i>$1</i>");
     if (line.startsWith(" - ")) {
         ul = true;
-        line = "<li>" + line + "</li>";
+        ol = -1;
+        line = "<li>" + line.substring(3) + "</li>";
     }
-    if (line.startsWith(" [1-9]+\.")) {
+    // We want to have a ul that's *not* inside an existing list (either ul or ol)
+    if (line.startsWith("- ")) {
+        ul = true;
+        line = "<li>" + line.substring(2) + "</li>";
+    }
+    let found = line.match(/^[0-9]+\. /);
+    if (found) {
         // check if we're inside <ol> and add if we are (if the number matches the last number +1
-        ol = 1; // TODO: get the number
-        let result = "<li>" + line + "</li>";
+        ol = found[0].match(/^[0-9]+\. /)[0];
+        line = "<li>" + line.substring(ol.length) + "</li>";
     }
-    if (ol == 0 && ul == false) {
+    if (line.startsWith("#")) {
+        h = true;
+        line = line.replace(/###### (.+)/, "<h6>$1</h6>");
+        line = line.replace(/##### (.+)/, "<h5>$1</h5>");
+        line = line.replace(/#### (.+)/, "<h4>$1</h4>");
+        line = line.replace(/### (.+)/, "<h3>$1</h3>");
+        line = line.replace(/## (.+)/, "<h2>$1</h2>");
+        line = line.replace(/# (.+)/, "<h1>$1</h1>");
+    }
+    if (ol == 0 && ul == false && h == false) {
         line = "<p>" + line + "</p>";
     }
     markdownPreview.addLine(line, ul, ol);
