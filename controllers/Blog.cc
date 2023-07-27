@@ -92,7 +92,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
     auto clientPtr = drogon::app().getDbClient();
     std::string query = "SELECT id, name FROM " + helpers::TablePrefix + "categories";
     auto result = clientPtr->execSqlSync(query);
-    std::string form = "<form action='' method='post'><label for='title'>Title:</label><input type='text' name='title' value='" + title +"' required><br><label for='subtitle'>Subtitle:</label><input type='text' name='subtitle' value='" + subtitle + "'><br><label for='category'>Category:</label><select name='category'>";
+    std::string form = "<div class='post-container'><div class='post-content-container'><form action='' method='post'><label for='title'>Title:</label><input type='text' name='title' value='" + title +"' required><br><label for='subtitle'>Subtitle:</label><input type='text' name='subtitle' value='" + subtitle + "'><br><label for='category'>Category:</label><select name='category'>";
     for (auto row : result) {
         form.append("<option value='");
         form.append(row["id"].as<std::string>());
@@ -113,7 +113,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
     form.append("</select><br><label for='isBlog'>isBlog ?:</label><input type='checkbox' id='isBlog' name='isBlog' checked><br><label for='tags'>Tags:</label><input type='text' name='tags' value='");
     form.append(tags +"'><br><label for='content'>Content:</label><textarea name='content' cols='128' rows='50'>");
     form.append(content +"</textarea id='markdown-content'><br><input type='submit' value='submit'><form><br>");
-    form.append("<div id='preview'></div>");
+    form.append("<div id='preview' class='></div></div></div>");
     std::unique_ptr<website> site(new website(keywords, "en-US", "Create Post", form, getLeftSidebar(), getRightSidebar(keywords)));
     callback(site->getPage());
 }
@@ -164,7 +164,7 @@ void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void 
     auto clientPtr = drogon::app().getDbClient();
     std::string query = "SELECT id, name FROM " + helpers::TablePrefix + "categories";
     auto result = clientPtr->execSqlSync(query);
-    std::string form = "<form action='' method='post'><label for='name'>Name:</label><input type='text' name='name' value='";
+    std::string form = "<div class='post-container'><div class='post-content-container'><form action='' method='post'><label for='name'>Name:</label><input type='text' name='name' value='";
     form.append(name);
     form.append("' required><br><label for='description'>Description:</label><input type='text' name='description' value='");
     form.append(description);
@@ -176,7 +176,7 @@ void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void 
         form.append(row["name"].as<std::string>());
         form.append("</option>");
     }
-    form.append("</select><br><label for='isBlog'>isBlog ?:</label><input type='checkbox' id='isBlog' name='isBlog' checked><br><label for='isExternal'>isExternal ?:</label><input type='checkbox' id='isExternal' name='isExternal'><br><input type='submit' value='submit'><form>");
+    form.append("</select><br><label for='isBlog'>isBlog ?:</label><input type='checkbox' id='isBlog' name='isBlog' checked><br><label for='isExternal'>isExternal ?:</label><input type='checkbox' id='isExternal' name='isExternal'><br><input type='submit' value='submit'><form></div></div>");
     std::unique_ptr<website> site(new website(keywords, "en-US", "Create Category", form, getLeftSidebar(), getRightSidebar(keywords)));
     callback(site->getPage());
 }
