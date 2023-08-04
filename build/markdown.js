@@ -1,5 +1,60 @@
 document.addEventListener('DOMContentLoaded', () => { 
     document.getElementsByTagName('textarea')[0].addEventListener("input", queueUpdate);
+    document.addEventListener('submit', (e) => {
+        // Store reference to form to make later code easier to read
+        const form = e.target;
+
+        // get status message references
+        const status = form.querySelector('.status');
+
+        doUpdate = 6;
+        preview();
+        let formBody = new FormData(form);
+        formBody.set('content', markdownPreview.get());
+
+        // Post data using the Fetch API
+        fetch(form.action, {
+            method: "POST",
+            body: formBody,
+        })
+             // We turn the response into text as we expect HTML
+            .then((res) => res.text())
+
+            // Let's turn it into an HTML document
+            .then((text) => new DOMParser().parseFromString(text, 'text/html'))
+
+            // Now we have a document to work with let's replace the <form>
+            .then((doc) => {
+                // Create result message container and copy HTML from doc
+                const result = document.createElement('div');
+                result.innerHTML = doc.body.innerHTML;
+
+                // And replace the form with the response children
+                form.parentNode.replaceChild(result, form);
+            })
+            .catch((err) => {
+                // Unlock form elements
+                Array.from(form.elements).forEach(
+                    (field) => (field.disabled = false)
+                );
+
+                // Return focus to active element
+                lastActive.focus();
+
+                // Hide the busy state
+                status.hidden = false;
+                status.innerText = err;
+            });
+
+        // Before we disable all the fields, remember the last active field
+        const lastActive = document.activeElement;
+
+        // Disable all form elements to prevent further input
+        Array.from(form.elements).forEach((field) => (field.disabled = true));
+
+        // Prevent the default form submit
+        e.preventDefault();
+    });
 });
 
 class Preview {
