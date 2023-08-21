@@ -115,8 +115,8 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
     form.append("</select><br><label for='isBlog'>isBlog ?:</label><input type='checkbox' id='isBlog' name='isBlog' checked><br><label for='tags'>Tags:</label><input type='text' name='tags' value='");
     form.append(tags +"'><br><label for='content'>Content:</label><textarea name='content' cols='128' rows='50'>");
     form.append(content +"</textarea id='markdown-content'><br><input type='submit' value='submit'><br><div id='preview'></div><p role='alert' class='status' hidden></p></form></div></div></div>");
-    std::unique_ptr<website> site(new website(keywords, "en-US", "Create Post", form, getLeftSidebar(), getRightSidebar(keywords)));
-    callback(site->getPage());
+    auto site = website(keywords, "en-US", "Create Post", form, getLeftSidebar(), getRightSidebar(keywords));
+    callback(site.getPage());
 }
 
 void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback) {
