@@ -313,7 +313,7 @@ void Blog::createSitemap() {
     std::ofstream sitemap;
     sitemap.open("sitemap.txt", std::ios::out | std::ios::trunc);
     for (auto row : result) {
-        sitemap << helpers::BaseURL << "/" << row["url"].as<std::string>() << std::endl;
+        sitemap << helpers::BaseURL << "/Blog/" << row["url"].as<std::string>() << std::endl;
     }
     query = "SELECT name, description, isExternal from " + helpers::TablePrefix + "categories WHERE parent IS NOT null AND isExternal = 0";
     result = clientPtr->execSqlSync(query);
