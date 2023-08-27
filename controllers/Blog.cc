@@ -153,8 +153,8 @@ void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void 
             std::string log = "Creating Category !<br>";
             auto result = clientPtr->execSqlSync(query, name, description, parent, language, isBlog, isExternal);
             log.append("done .... ");
-            std::unique_ptr<website> site(new website(keywords, "en", "Creating Category !", log, getLeftSidebar(), getRightSidebar(keywords)));
-            callback(site->getPage());
+            auto site = website(keywords, "en", "Creating Category !", log, getLeftSidebar(), getRightSidebar(keywords));
+            callback(site.getPage());
             createSitemap();
             return;
         }
@@ -178,8 +178,8 @@ void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void 
         form.append("</option>");
     }
     form.append("</select><br><label for='isBlog'>isBlog ?:</label><input type='checkbox' id='isBlog' name='isBlog' checked><br><label for='isExternal'>isExternal ?:</label><input type='checkbox' id='isExternal' name='isExternal'><br><input type='submit' value='submit'><form></div></div>");
-    std::unique_ptr<website> site(new website(keywords, "en-US", "Create Category", form, getLeftSidebar(), getRightSidebar(keywords)));
-    callback(site->getPage());
+    auto site = website(keywords, "en-US", "Create Category", form, getLeftSidebar(), getRightSidebar(keywords));
+    callback(site.getPage());
 }
 
 void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string url) {
@@ -233,8 +233,8 @@ void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (
     }
     content.append("</table>");
     content = "<div class='post-container'><h1>Archive</h1><div class='post-content-container'>" + content + "</div>";
-    std::unique_ptr<website> site(new website(keywords, "en-US", "Blog Archive", content, getLeftSidebar(), getRightSidebar(keywords)));
-    callback(site->getPage());
+    auto site = website(keywords, "en-US", "Blog Archive", content, getLeftSidebar(), getRightSidebar(keywords));
+    callback(site.getPage());
 }
 
 void Blog::renderHome(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback) {
