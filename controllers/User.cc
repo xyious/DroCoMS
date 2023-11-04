@@ -25,7 +25,9 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
     }
     if (email.empty() || (!req->session()->get<std::string>("email").empty() && email != req->session()->get<std::string>("email"))) {
         LOG_TRACE << email << " " << req->session()->get<std::string>("email");
-        std::string form = "<form action='' method='post'><label for='username'>Username:</label><input type='text' name='username' required><br><label for='email'>Email:</label><input type='email' name='email'><br><input type='submit' value='submit'><form>";
+        std::string form = "<html><body><script src=\"https://accounts.google.com/gsi/client\" async></script><div id=\"g_id_onload\" data-client_id=\"";
+        form += helpers::GoogleCId + "data-login_uri=\"" + helpers::BaseURL + "/login\" data-auto_prompt=\"false\"></div>";
+        form += "<div class=\"g_id_signin\" data-type=\"standard\" data-size=\"large\" data-theme=\"outline\" data-text=\"sign_in_with\" data-shape=\"rectangular\" data-logo_alignment=\"left\"></div><body></html>";
         auto site = new website(keywords, "en", "Login", form);
         callback(site->getPage());
         return;
