@@ -96,25 +96,18 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
     auto result = clientPtr->execSqlSync(query);
     std::string form = "<div class='post-container'><div class='post-content-container'><form action='' method='post'><label for='title'>Title:</label><input type='text' name='title' value='" + title +"' required><br><label for='subtitle'>Subtitle:</label><input type='text' name='subtitle' value='" + subtitle + "'><br><label for='category'>Category:</label><select name='category'>";
     for (auto row : result) {
-        form.append("<option value='");
-        form.append(row["id"].as<std::string>());
-        form.append("'>");
-        form.append(row["name"].as<std::string>());
-        form.append("</option>");
+        form.append("<option value='" + row["id"].as<std::string>() + "'>" + row["name"].as<std::string>() + "</option>");
     }
     form.append("</select><br><label for='language'>Language:</label><select name='language'><option value='en-US'>English</option><option value='de-DE'>German</option></select><br><label for='author'>Author:</label><select name='author'>");
     query = "SELECT id, name FROM " + helpers::TablePrefix + "users";
     result = clientPtr->execSqlSync(query);
     for (auto row : result) {
-        form.append("<option value='");
-        form.append(row["id"].as<std::string>());
-        form.append("'>");
-        form.append(row["name"].as<std::string>());
-        form.append("</option>");
+        form.append("<option value='" + row["id"].as<std::string>() + "'>" + row["name"].as<std::string>() + "</option>");
     }
     form.append("</select><br><label for='isBlog'>isBlog ?:</label><input type='checkbox' id='isBlog' name='isBlog' checked><br><label for='tags'>Tags:</label><input type='text' name='tags' value='");
     form.append(tags +"'><br><label for='content'>Content:</label><textarea name='content' cols='128' rows='50'>");
     form.append(content +"</textarea id='markdown-content'><br><input type='submit' value='submit'><br><div id='preview'></div><p role='alert' class='status' hidden></p></form></div></div></div>");
+    form.append("<div id='g_id_onload' data-client_id='" + helpers::GoogleClientId + " data-login_uri='" + helpers::BaseURL + "/login' </div>");
     auto site = website(keywords, "en-US", "Create Post", form, getLeftSidebar(), getRightSidebar(keywords));
     callback(site.getPage());
 }

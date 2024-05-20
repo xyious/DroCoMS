@@ -6,7 +6,7 @@ class helpers {
         static std::string      BaseURL;
         static std::string      TablePrefix;
         static std::string      AnalyticsId;
-        static std::string      GoogleCId;
+        static std::string      GoogleClientId;
 
         static std::vector<std::string> split(std::string input, std::string delimiter) {
             std::vector<std::string> result;

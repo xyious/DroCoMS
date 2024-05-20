@@ -6,7 +6,7 @@
 std::string helpers::BaseURL;
 std::string helpers::TablePrefix;
 std::string helpers::AnalyticsId;
-std::string helpers::GoogleCId;
+std::string helpers::GoogleClientId;
 
 std::string getCustomValue(const Json::Value json, std::string key) {
     if (!json[key].empty())
@@ -23,7 +23,7 @@ int main() {
     helpers::BaseURL = getCustomValue(json, "base_url");
     helpers::TablePrefix = getCustomValue(json, "table_prefix");
     helpers::AnalyticsId = getCustomValue(json, "analytics_id");
-    helpers::GoogleCId = getCustomValue(json, "google_client_id");
+    helpers::GoogleClientId = getCustomValue(json, "google_client_id");
     LOG_TRACE << helpers::BaseURL;
     //Run HTTP framework,the method will block in the internal event loop
     drogon::app().run();

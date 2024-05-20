@@ -4,7 +4,7 @@
 #include "helpers/helpers.h"
 #include "../helpers/Constants.h"
 
-website::website(std::vector<std::string> keywords, std::string language, std::string title, std::string content, std::string leftSidebarContent, std::string rightSidebarContent, std::string stylesheet) {
+website::website(std::vector<std::string> keywords, std::string language, std::string title, std::string content, std::string leftSidebarContent, std::string rightSidebarContent, std::string stylesheet, std::vector<std::string> scripts) {
     this->keywords = keywords;
     this->language = language;
     this->title = title;

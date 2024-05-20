@@ -31,5 +31,5 @@ class website {
         std::string                             getStyleTag(std::string path);
         
         website();
-        website(std::vector<std::string> keywords, std::string language, std::string title, std::string content, std::string leftSidebarContent = "", std::string rightSidebarContent = "", std::string stylesheet = "");
+        website(std::vector<std::string> keywords, std::string language, std::string title, std::string content, std::string leftSidebarContent = "", std::string rightSidebarContent = "", std::string stylesheet = "", std::vector<std::string> scripts = {});
 };
