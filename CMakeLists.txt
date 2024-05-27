@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(dwebsite CXX)
+project(testwebsite CXX)
 
 include(CheckIncludeFileCXX)
 
@@ -34,10 +34,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon)
 # ##############################################################################
 
 if (CMAKE_CXX_STANDARD LESS 17)
-    # With C++14, use boost to support any, string_view and filesystem
-    message(STATUS "use c++14")
-    find_package(Boost 1.61.0 REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
+    message(FATAL_ERROR "c++17 or higher is required")
 elseif (CMAKE_CXX_STANDARD LESS 20)
     message(STATUS "use c++17")
 else ()

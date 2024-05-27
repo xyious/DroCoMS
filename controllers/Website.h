@@ -13,6 +13,7 @@ class website {
         std::string                 leftSidebarContent;
         std::string                 rightSidebarContent;
         std::string                 page;
+        std::vector<std::string>    scripts;
 
     public:
         void                                    setContent(std::string content);
@@ -28,7 +29,7 @@ class website {
         std::string                             getRightSidebar();
         std::string                             getTitle();
         std::string                             getTitleTag();
-        std::string                             getStyleTag(std::string path);
+        std::string                             getStyleTag();
         
         website();
         website(std::vector<std::string> keywords, std::string language, std::string title, std::string content, std::string leftSidebarContent = "", std::string rightSidebarContent = "", std::string stylesheet = "", std::vector<std::string> scripts = {});

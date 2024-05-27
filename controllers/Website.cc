@@ -8,10 +8,15 @@ website::website(std::vector<std::string> keywords, std::string language, std::s
     this->keywords = keywords;
     this->language = language;
     this->title = title;
-    this->stylesheet = stylesheet;
     this->setLeftSidebarContent(leftSidebarContent);
     this->setRightSidebarContent(rightSidebarContent);
     this->setContent(content);
+    if (this->stylesheet.length() == 0) {
+        this->stylesheet = "<link rel='stylesheet' href='/stylesheet.css'>";
+    } else {
+       this->stylesheet = "<link rel='stylesheet' href='" + stylesheet + "'>";
+    }
+    this->scripts = scripts;
 }
 
 website::website() {}
@@ -57,14 +62,6 @@ std::string website::getTitleTag() {
     return title;
 }
 
-std::string website::getStyleTag(std::string path = "") {
-    if (path.empty()) {
-        path = "/stylesheet.css";
-    }
-    std::string result = ((std::string)"<link rel='stylesheet' href='" + path + "'>");
-    return result;
-}
-
 std::string website::getPost(std::string url, std::string title, std::string subtitle, std::string content, std::string author, std::string timestamp) {
     std::string result = "<div class='post-container'><a href='" + helpers::BaseURL + "/Blog/";
     result.append(url + "'><h1>" + title + "</a></h1>");
@@ -84,10 +81,11 @@ std::shared_ptr<drogon::HttpResponse> website::getPage() {
     } else {
         this->page.append(HTMLTAGEN);
     }
-    if (this->content.find("markdown-content") != std::string::npos) {
-        this->page.append("<script src='/markdown.js'></script>");
+    for (auto script : this->scripts) {
+        this->page.append("<script async src='/" + script + "'></script>");
     }
-    this->page.append("<script async src='https://www.googletagmanager.com/gtag/js?id=" + helpers::AnalyticsId + "'></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '" + helpers::AnalyticsId + "');</script>" + getTitleTag() + getStyleTag() + BODYTAG + this->leftSidebarContent + this->rightSidebarContent + this->content + ENDTAG);
+    this->page.append("<script async src='https://www.googletagmanager.com/gtag/js?id=" + helpers::AnalyticsId + "'></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '" + helpers::AnalyticsId + "');</script>");
+    this->page.append(getTitleTag() + this->stylesheet + BODYTAG + this->leftSidebarContent + this->rightSidebarContent + this->content + ENDTAG);
     resp->setStatusCode(drogon::HttpStatusCode::k200OK);
     resp->setBody(this->page);
     return resp;
