@@ -6,8 +6,8 @@ class Blog : public drogon::HttpController<Blog>
 {
   public:
     METHOD_LIST_BEGIN
-    ADD_METHOD_TO(Blog::create, "/Blog/Create", drogon::Get, drogon::Post, "LoginFilter");
-    ADD_METHOD_TO(Blog::createCategory, "/Category/Create", drogon::Get, drogon::Post, "LoginFilter");
+    ADD_METHOD_TO(Blog::create, "/Blog/Create", drogon::Get, drogon::Post);
+    ADD_METHOD_TO(Blog::createCategory, "/Category/Create", drogon::Get, drogon::Post);
     ADD_METHOD_TO(Blog::renderArchive, "/Blog/Archive", drogon::Get);
     ADD_METHOD_TO(Blog::renderPost, "/Blog/{url}", drogon::Get);
     ADD_METHOD_TO(Blog::renderTag, "/Tags/{tag}", drogon::Get);

@@ -106,9 +106,10 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
     }
     form.append("</select><br><label for='isBlog'>isBlog ?:</label><input type='checkbox' id='isBlog' name='isBlog' checked><br><label for='tags'>Tags:</label><input type='text' name='tags' value='");
     form.append(tags +"'><br><label for='content'>Content:</label><textarea name='content' cols='128' rows='50'>");
-    form.append(content +"</textarea id='markdown-content'><br><input type='submit' value='submit'><br><div id='preview'></div><p role='alert' class='status' hidden></p></form></div></div></div>");
-    form.append("<div id='g_id_onload' data-client_id='" + helpers::GoogleClientId + " data-login_uri='" + helpers::BaseURL + "/login' </div>");
-    auto site = website(keywords, "en-US", "Create Post", form, getLeftSidebar(), getRightSidebar(keywords));
+    form.append(content +"</textarea><br><input type='submit' value='submit'></form><br><div id='preview'></div><p role='alert' class='status' hidden></p>");
+    form.append("<div id='g_id_onload' data-client_id='" + helpers::GoogleClientId + "' data-login_uri='" + helpers::BaseURL + "/login'></div></div></div></div>");
+    auto site = website(keywords, "en-US", "Create Post", form, getLeftSidebar(), getRightSidebar(keywords), "", { "/markdown.js", "https://accounts.google.com/gsi/client" });
+    LOG_TRACE << form;
     callback(site.getPage());
 }
 

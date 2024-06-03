@@ -42,7 +42,7 @@ void website::setTitle(std::string title) {
 }
 
 void website::setLeftSidebarContent(std::string content) {
-    LOG_TRACE << "left sidebar: " << content;
+    // LOG_TRACE << "left sidebar: " << content;
     this->leftSidebarContent = "<nav class='left-sidebar'><ul><li><h3><a href='" + helpers::BaseURL + "'>Home</a></h3></li>" + content + "</ul></nav>";
 }
 
@@ -82,7 +82,8 @@ std::shared_ptr<drogon::HttpResponse> website::getPage() {
         this->page.append(HTMLTAGEN);
     }
     for (auto script : this->scripts) {
-        this->page.append("<script async src='/" + script + "'></script>");
+        LOG_TRACE << script;
+        this->page.append("<script async src='" + script + "'></script>");
     }
     this->page.append("<script async src='https://www.googletagmanager.com/gtag/js?id=" + helpers::AnalyticsId + "'></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '" + helpers::AnalyticsId + "');</script>");
     this->page.append(getTitleTag() + this->stylesheet + BODYTAG + this->leftSidebarContent + this->rightSidebarContent + this->content + ENDTAG);
