@@ -11,4 +11,5 @@ class User : public drogon::HttpController<User>
     METHOD_LIST_END
 
     void login(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback);
+    bool isAuthorized(std::string);
 };

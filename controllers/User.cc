@@ -7,32 +7,46 @@
 #include "User.h"
 #include "Website.h"
 
+bool User::isAuthorized(std::string email) {
+    std::string query = "SELECT username FROM " + helpers::TablePrefix + "Users WHERE email = $1";
+    auto clientPtr = drogon::app().getDbClient();
+    auto result = clientPtr->execSqlSync(query, email);
+    for (auto row : result) {
+        LOG_TRACE << "User name: " << row["username"].as<std::string>();
+        return true;
+    }
+    return false;
+}
+
 void User::login(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback) {
     std::vector<std::string> keywords;
     auto params = req->getParameters();
-    std::string credential, token;
+    std::string credential;
+    bool tokenPresent = false;
     for (auto param : params) {
         std::string key = std::get<0>(param);
         std::string value = std::get<1>(param);
         if (key == "credential") {
             credential = value;
         } else if (key == "g_csrf_token") {
-            token = value;
+            tokenPresent = true;
         }
         LOG_TRACE << key << ", " << value;
     }
-    if (token == "540103bc95d67db7" && credential.length() > 0) {
+    if (tokenPresent && credential.length() > 0) {
         std::vector<std::string> parts = helpers::split(credential, ".");
         for (auto part : parts) {
             std::string decodedPart = drogon::utils::base64Decode(part);
             LOG_TRACE << decodedPart;
             std::size_t startPos = decodedPart.find("\"email\":\"");
             if (startPos != std::string::npos) {
-                std::string email = decodedPart.substr(startPos + 7, decodedPart.find("\"", startPos));
+                startPos += 9;
+                std::string email = decodedPart.substr(startPos, decodedPart.find("\"", startPos) - startPos);
                 LOG_TRACE << email;
                 if (isAuthorized(email)) {
-                    req->session()->insert("loginTimeout", duration);
+                    req->session()->insert("loginToken", "some gibberish");
                 }
+                break;
             }
         }
     }
@@ -41,6 +55,3 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
     callback(res);
 }
 
-bool isAuthorized(std::string email) {
-    std::string query = "SELECT username FROM Users WHERE email = $1";
-}
