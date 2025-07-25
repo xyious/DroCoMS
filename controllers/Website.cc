@@ -19,7 +19,9 @@ website::website(std::vector<std::string> keywords, std::string language, std::s
     this->scripts = scripts;
 }
 
-website::website() {}
+website::website() {
+    this->stylesheet = "<link rel='stylesheet' href='/stylesheet.css'>";
+}
 
 void website::setContent(std::string content) {
     this->content = "<div class='content-container'>" + content + "</div>";

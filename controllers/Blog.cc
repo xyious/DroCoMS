@@ -82,7 +82,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
                 result = clientPtr->execSqlSync(query, value, postId);
             }
             log.append("done");
-            std::unique_ptr<website> site(new website(keywords, "en", "Creating Post !", log, getLeftSidebar(), getRightSidebar(keywords)));
+            std::unique_ptr<website> site = std::make_unique<website>(keywords, "en", "Creating Post !", log, getLeftSidebar(), getRightSidebar(keywords));
             callback(site->getPage());
             createSitemap();
             return;
@@ -233,7 +233,7 @@ void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (
 
 void Blog::renderHome(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback) {
     auto clientPtr = drogon::app().getDbClient();
-    std::unique_ptr<website> site(new website());
+    std::unique_ptr<website> site = std::make_unique<website>();
     std::string query = "SELECT " + helpers::TablePrefix + "Blog.post_id, " + helpers::TablePrefix + "Blog.url, " + helpers::TablePrefix + "Blog.title, " + helpers::TablePrefix + "Blog.subtitle, " + helpers::TablePrefix + "Blog.content, " + helpers::TablePrefix + "Blog.language, " + helpers::TablePrefix + "Users.name, to_char(" +  helpers::TablePrefix + "Blog.create_timestamp,'Month DD YYYY') as timestamp FROM " + helpers::TablePrefix + "Blog, " + helpers::TablePrefix + "Users WHERE " + helpers::TablePrefix + "Blog.author = " + helpers::TablePrefix + "Users.id AND isBlog=1 ORDER BY " + helpers::TablePrefix + "Blog.create_timestamp DESC LIMIT 3";
     auto result = clientPtr->execSqlSync(query);
     parseResults(result, site.get());
