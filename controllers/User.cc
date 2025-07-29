@@ -1,8 +1,8 @@
 #include <string>
-#include <openssl/evp.h>
-#include <openssl/sha.h>
 #include <trantor/utils/Date.h>
 #include <trantor/utils/Utilities.h>
+#include <json/json.h>
+#include <jwt-cpp/jwt.h>
 #include "helpers/helpers.h"
 #include "User.h"
 #include "Website.h"
@@ -35,18 +35,30 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
     }
     if (tokenPresent && credential.length() > 0) {
         std::vector<std::string> parts = helpers::split(credential, ".");
-        for (auto part : parts) {
-            std::string decodedPart = drogon::utils::base64Decode(part);
-            LOG_TRACE << decodedPart;
-            std::size_t startPos = decodedPart.find("\"email\":\"");
-            if (startPos != std::string::npos) {
-                startPos += 9;
-                std::string email = decodedPart.substr(startPos, decodedPart.find("\"", startPos) - startPos);
+        if (parts.length() <= 3) {
+            std::string jwt = drogon::utils::base64Decode(part[1]);
+            std::string decoded_token = jwt::decode(credential);
+            // Look, I have a single user and it's me. I'm not going to make this thread safe or even cache this .... Or get it live.... 
+            // for now.... This key /should be/ identical to what's on google's page: https://www.googleapis.com/oauth2/v3/certs
+            std::string n = "rHz-FQE9gjFJR_FhnzhBMPpa8NJ2nCfnXLr5LWDJOOaiGqI__Nrm6HHUCpMi52_pLqqVkCihR9xbscZ6UKr9wjp-7YTDN6A9i7QqQAJyNRIMCkJR1z6D95_pam_mIkBVnYjJ_LskOyOHI65Yvuaw6oA9iFlSyucn4B-jZRmp7JyGyU8UMohaOvJB7_boaIoEx_QY8YdoANKrp0WGawEkW6RgopgiHB7D0CXU-c_GDp0TjWCZegQzoV_fDD5eH5mc2Ai3dBylZxgQ-ZxMakYS01nmVr1atkpHT1L9W7PiCP60C8WG1aLIzZTLcABK3BWCmZ3-wBZtHZ0y9kSP35aowQ";
+            std::string e = "AQAB";
+            try {
+                auto verifier = jwt::verify().allow_algorithm(jwt::algorithm::rs256(jwt::helper::decode_base64url(n), jwt::helper::decode_base64url(e)));
+                verifier.verify(decoded_token);
+                std::string email = decoded_token.get_payload_claim("email").as_string();
                 LOG_TRACE << email;
                 if (isAuthorized(email)) {
-                    req->session()->insert("loginToken", "some gibberish");
+                    req->session()->insert("loginToken", decoded_token);
                 }
-                break;
+                LOG_TRACE << "Logged in";
+                auto site = website(keywords, "en", "Login", "Logged in....");
+                callback(site.getPage());
+                return;
+            } catch (const std::exception& e) {
+                LOG_ERROR << "Error while processing token: " << e.what();
+                auto resp = drogon::HttpResponse::newHttpResponse(drogon::k500InternalServerError, drogon::CT_TEXT_PLAIN);
+                resp->setBody("Internal server error during token verification.");
+                fc(resp);
             }
         }
     }

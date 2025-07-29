@@ -33,6 +33,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon)
 
 # ##############################################################################
 
+# JWT-CPP (https://github.com/Thalhammer/jwt-cpp)
+find_package(jwt-cpp CONFIG REQUIRED)
+target_link_libraries(dwebsite PRIVATE jwt-cpp::jwt-cpp)
+
 if (CMAKE_CXX_STANDARD LESS 17)
     message(FATAL_ERROR "c++17 or higher is required")
 elseif (CMAKE_CXX_STANDARD LESS 20)
