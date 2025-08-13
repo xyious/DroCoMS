@@ -4,7 +4,7 @@
 #include "helpers/helpers.h"
 #include "../helpers/Constants.h"
 
-website::website(std::vector<std::string> keywords, std::string language, std::string title, std::string content, std::string leftSidebarContent, std::string rightSidebarContent, std::string stylesheet, std::vector<std::string> scripts) {
+Website::Website(std::vector<std::string> keywords, std::string language, std::string title, std::string content, std::string leftSidebarContent, std::string rightSidebarContent, std::string stylesheet, std::vector<std::string> scripts) {
     this->keywords = keywords;
     this->language = language;
     this->title = title;
@@ -19,36 +19,36 @@ website::website(std::vector<std::string> keywords, std::string language, std::s
     this->scripts = scripts;
 }
 
-website::website() {
+Website::Website() {
     this->stylesheet = "<link rel='stylesheet' href='/stylesheet.css'>";
 }
 
-void website::setContent(std::string content) {
+void Website::setContent(std::string content) {
     this->content = "<div class='content-container'>" + content + "</div>";
 }
 
-std::string website::getLanguage() {
+std::string Website::getLanguage() {
     return this->language;
 }
 
-void website::setLanguage(std::string language) {
+void Website::setLanguage(std::string language) {
     this->language = language;
 }
 
-std::string website::getTitle() {
+std::string Website::getTitle() {
     return this->title;
 }
 
-void website::setTitle(std::string title) {
+void Website::setTitle(std::string title) {
     this->title = title;
 }
 
-void website::setLeftSidebarContent(std::string content) {
+void Website::setLeftSidebarContent(std::string content) {
     // LOG_TRACE << "left sidebar: " << content;
     this->leftSidebarContent = "<nav class='left-sidebar'><ul><li><h3><a href='" + helpers::BaseURL + "'>Home</a></h3></li>" + content + "</ul></nav>";
 }
 
-void website::setRightSidebarContent(std::string content) {
+void Website::setRightSidebarContent(std::string content) {
     if (content.empty()) {
         content = "&nbsp;";
     } else {
@@ -57,14 +57,14 @@ void website::setRightSidebarContent(std::string content) {
     this->rightSidebarContent = "<div class='right-sidebar'>" + rightSidebarContent + "</div>";
 }
 
-std::string website::getTitleTag() {
+std::string Website::getTitleTag() {
     std::string title = "<title>";
     title.append(this->title);
     title.append("</title>");
     return title;
 }
 
-std::string website::getPost(std::string url, std::string title, std::string subtitle, std::string content, std::string author, std::string timestamp) {
+std::string Website::getPost(std::string url, std::string title, std::string subtitle, std::string content, std::string author, std::string timestamp) {
     std::string result = "<div class='post-container'><a href='" + helpers::BaseURL + "/Blog/";
     result.append(url + "'><h1>" + title + "</a></h1>");
     if (!subtitle.empty()) {
@@ -75,7 +75,7 @@ std::string website::getPost(std::string url, std::string title, std::string sub
     return result;
 }
 
-std::shared_ptr<drogon::HttpResponse> website::getPage() {
+std::shared_ptr<drogon::HttpResponse> Website::getPage() {
     auto resp = drogon::HttpResponse::newHttpResponse();
     this->page = DOCTYPE;
     if (this->language == "de-DE") {

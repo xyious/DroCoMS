@@ -68,13 +68,13 @@ void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::f
         } else {
             output.append("Database exists, skipping user and category creation");
         }
-        auto site = website(keywords, "en", "Installing Database", output);
+        auto site = Website(keywords, "en", "Installing Database", output);
         callback(site.getPage());
         return;
     } else {
         LOG_TRACE << "Get InstallDb";
         std::string form = "<form action='' method='post'><label for='username'>Username:</label><input type='text' name='username' required><br><label for='email'>Email:</label><input type='email' name='email' required><br><label for='name'>Name:</label><input type='text' name='name'><br><input type='submit' value='submit'><form>";
-        auto site = website(keywords, "en", "Create Database", form);
+        auto site = Website(keywords, "en", "Create Database", form);
         callback(site.getPage());
         return;
     }

@@ -106,7 +106,7 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
                     std::string query = "UPDATE " + helpers::TablePrefix + "Users SET token = $1 WHERE email = $2";
                     auto clientPtr = drogon::app().getDbClient();
                     auto result = clientPtr->execSqlSync(query, exp, email);
-                    LOG_TRACE << "Logged in";
+                    LOG_TRACE << "Logged in, email: " + email + ", exp: " + exp;
                     auto resp = drogon::HttpResponse::newRedirectionResponse(req->getHeader("referer"));
                     callback(resp);
                     return;

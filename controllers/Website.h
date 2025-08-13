@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-class website {
+class Website {
     private:
         std::vector<std::string>    keywords;
         std::string                 language;
@@ -31,6 +31,6 @@ class website {
         std::string                             getTitleTag();
         std::string                             getStyleTag();
         
-        website();
-        website(std::vector<std::string> keywords, std::string language, std::string title, std::string content, std::string leftSidebarContent = "", std::string rightSidebarContent = "", std::string stylesheet = "", std::vector<std::string> scripts = {});
+        Website();
+        Website(std::vector<std::string> keywords, std::string language, std::string title, std::string content, std::string leftSidebarContent = "", std::string rightSidebarContent = "", std::string stylesheet = "", std::vector<std::string> scripts = {});
 };
