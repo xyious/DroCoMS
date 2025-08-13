@@ -27,4 +27,10 @@ class helpers {
             }
             return result;
         }
+
+        static std::string base64UrlDecode(std::string input) {
+            std::replace(input.begin(), input.end(), '-', '+');
+            std::replace(input.begin(), input.end(), '_', '/');
+            return drogon::utils::base64Decode(input);
+        }
 };

@@ -24,8 +24,6 @@ int main() {
     helpers::TablePrefix = getCustomValue(json, "table_prefix");
     helpers::AnalyticsId = getCustomValue(json, "analytics_id");
     helpers::GoogleClientId = getCustomValue(json, "google_client_id");
-    LOG_TRACE << helpers::BaseURL;
-    //Run HTTP framework,the method will block in the internal event loop
     drogon::app().run();
     return 0;
 }

@@ -1,6 +1,8 @@
 #pragma once
 
+#include <string>
 #include <drogon/HttpController.h>
+#include <trantor/utils/Utilities.h>
 
 
 class User : public drogon::HttpController<User>
@@ -10,6 +12,8 @@ class User : public drogon::HttpController<User>
     ADD_METHOD_TO(User::login, "/login", drogon::Get, drogon::Post);
     METHOD_LIST_END
 
-    void login(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback);
+    std::string getPublicKey(std::string);
     bool isAuthorized(std::string);
+    void login(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback);
+    bool verifySignature(std::vector<std::string>);
 };

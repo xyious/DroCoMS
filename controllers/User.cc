@@ -1,8 +1,10 @@
 #include <string>
+#include <drogon/HttpClient.h>
 #include <trantor/utils/Date.h>
-#include <trantor/utils/Utilities.h>
+#include <openssl/evp.h>
+#include <openssl/param_build.h>
+#include <openssl/rsa.h>
 #include <json/json.h>
-#include <jwt-cpp/jwt.h>
 #include "helpers/helpers.h"
 #include "User.h"
 #include "Website.h"
@@ -16,6 +18,61 @@ bool User::isAuthorized(std::string email) {
         return true;
     }
     return false;
+}
+
+bool User::verifySignature(std::vector<std::string> data) {
+    auto client = drogon::HttpClient::newHttpClient("https://www.googleapis.com");
+    auto req = drogon::HttpRequest::newHttpRequest();
+    req->setPath("/oauth2/v3/certs");
+    Json::Value json;
+    Json::Reader reader;
+    reader.parse(helpers::base64UrlDecode(data[0]), json);
+    std::string kid = json["kid"].asString();
+    auto resp = client->sendRequest(req);
+    if (resp.first != drogon::ReqResult::Ok) {
+        LOG_WARN << "Failed to get keys";
+        return false;
+    }
+    std::string body(resp.second->body());
+    reader.parse(body, json);
+    std::string n_bytes, e_bytes;
+    bool verified = false;
+    for (const auto &k : json["keys"]) {
+        if (!k.isMember("kid")) continue;
+        if (kid == k["kid"].asString()) {
+            LOG_TRACE << "Found kid: " << kid;
+            n_bytes = helpers::base64UrlDecode(k["n"].asString());
+            e_bytes = helpers::base64UrlDecode(k["e"].asString());
+        }
+    }
+    auto n_bn = std::unique_ptr<BIGNUM, decltype(&BN_free)>(BN_bin2bn((const unsigned char *)n_bytes.c_str(), n_bytes.size(), nullptr), &BN_free);
+    auto e_bn = std::unique_ptr<BIGNUM, decltype(&BN_free)>(BN_bin2bn((const unsigned char *)e_bytes.c_str(), e_bytes.size(), nullptr), &BN_free);
+    if (!e_bn || !n_bn) {
+        LOG_ERROR << "Failed setting BIGNUMs";
+        return false;
+    }
+    RSA *rsa = RSA_new();
+    if (!rsa) {
+        LOG_ERROR << "Failed to create RSA";
+        return false;
+    }
+    RSA_set0_key(rsa, n_bn.release(), e_bn.release(), nullptr);
+    std::unique_ptr<EVP_PKEY, decltype(&EVP_PKEY_free)> public_key(EVP_PKEY_new(), &EVP_PKEY_free);
+    if (!EVP_PKEY_assign_RSA(public_key.get(), rsa)) {
+        LOG_ERROR << "Failed to assign RSA";
+        RSA_free(rsa);
+        return false;
+    }
+    std::unique_ptr<EVP_MD_CTX, decltype(&EVP_MD_CTX_free)> ctx(EVP_MD_CTX_new(), &EVP_MD_CTX_free);
+    if (1 == EVP_DigestVerifyInit(ctx.get(), nullptr, EVP_sha256(), nullptr, public_key.get())) {
+        std::string headerAndPayload = data[0] + "." + data[1];
+        std::string signature = helpers::base64UrlDecode(data[2]);
+        if (1 == EVP_DigestVerifyUpdate(ctx.get(), headerAndPayload.c_str(), headerAndPayload.size())) {
+            int result = EVP_DigestVerifyFinal(ctx.get(), (const unsigned char*)signature.c_str(), signature.size());
+            verified = (result == 1);
+        }
+    }
+    return verified;
 }
 
 void User::login(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback) {
@@ -35,30 +92,24 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
     }
     if (tokenPresent && credential.length() > 0) {
         std::vector<std::string> parts = helpers::split(credential, ".");
-        if (parts.length() <= 3) {
-            std::string jwt = drogon::utils::base64Decode(part[1]);
-            std::string decoded_token = jwt::decode(credential);
-            // Look, I have a single user and it's me. I'm not going to make this thread safe or even cache this .... Or get it live.... 
-            // for now.... This key /should be/ identical to what's on google's page: https://www.googleapis.com/oauth2/v3/certs
-            std::string n = "rHz-FQE9gjFJR_FhnzhBMPpa8NJ2nCfnXLr5LWDJOOaiGqI__Nrm6HHUCpMi52_pLqqVkCihR9xbscZ6UKr9wjp-7YTDN6A9i7QqQAJyNRIMCkJR1z6D95_pam_mIkBVnYjJ_LskOyOHI65Yvuaw6oA9iFlSyucn4B-jZRmp7JyGyU8UMohaOvJB7_boaIoEx_QY8YdoANKrp0WGawEkW6RgopgiHB7D0CXU-c_GDp0TjWCZegQzoV_fDD5eH5mc2Ai3dBylZxgQ-ZxMakYS01nmVr1atkpHT1L9W7PiCP60C8WG1aLIzZTLcABK3BWCmZ3-wBZtHZ0y9kSP35aowQ";
-            std::string e = "AQAB";
-            try {
-                auto verifier = jwt::verify().allow_algorithm(jwt::algorithm::rs256(jwt::helper::decode_base64url(n), jwt::helper::decode_base64url(e)));
-                verifier.verify(decoded_token);
-                std::string email = decoded_token.get_payload_claim("email").as_string();
-                LOG_TRACE << email;
+        if (parts.size() >= 3) {
+            if (verifySignature(parts)) {
+                LOG_TRACE << "Verified";
+                Json::Value json;
+                Json::Reader reader;
+                reader.parse(helpers::base64UrlDecode(parts[1]), json);
+                std::string email = json["email"].asString();
+                std::string exp = json["exp"].asString();
                 if (isAuthorized(email)) {
-                    req->session()->insert("loginToken", decoded_token);
+                    req->session()->insert("exp", exp);
                 }
+                std::string query = "UPDATE " + helpers::TablePrefix + "Users SET Password = '$1' WHERE email = '$2'";
+                auto clientPtr = drogon::app().getDbClient();
+                auto result = clientPtr->execSqlSync(query, exp, email);
                 LOG_TRACE << "Logged in";
-                auto site = website(keywords, "en", "Login", "Logged in....");
-                callback(site.getPage());
+                auto resp = drogon::HttpResponse::newRedirectionResponse(req->getHeader("referer"));
+                callback(resp);
                 return;
-            } catch (const std::exception& e) {
-                LOG_ERROR << "Error while processing token: " << e.what();
-                auto resp = drogon::HttpResponse::newHttpResponse(drogon::k500InternalServerError, drogon::CT_TEXT_PLAIN);
-                resp->setBody("Internal server error during token verification.");
-                fc(resp);
             }
         }
     }
