@@ -1,6 +1,5 @@
 #include <vector>
 #include <string>
-#include <exception>
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 #include <drogon/orm/DbClient.h>
@@ -61,15 +60,10 @@ void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::f
             query = "INSERT INTO " + helpers::TablePrefix + "Categories (name, description, language, isBlog, isExternal) VALUES ('main', 'This is where literally everything goes', 'en-US', 1, 0);";
             result = clientPtr->execSqlSync(query);
             output.append(".... done<br>Creating user....<br>");
-            query = "INSERT INTO " + helpers::TablePrefix + "Users (username, email, name, token, expiration, can_post) VALUES ($1, $2, $3, $4, $5, $6)";
+            query = "INSERT INTO " + helpers::TablePrefix + "Users (username, email, name, can_post) VALUES ($1, $2, $3, $4)";
             std::string password = email + std::to_string(trantor::Date::date().microSecondsSinceEpoch());
-            unsigned char hash[SHA512_DIGEST_LENGTH];
-            EVP_Digest(password.c_str(),password.size(),hash,NULL,EVP_sha512(),NULL);
-            token = drogon::utils::base64Encode(hash, SHA512_DIGEST_LENGTH, true);
-            unsigned long long expiration = trantor::Date::date().microSecondsSinceEpoch() + (365L * 24 * 60 * 60 * 1000000);         // The first user gets to stay logged in for 1 year (because it's me and I make good decisions)
-            req->session()->insert("loginTimeout",  expiration);
-            result = clientPtr->execSqlSync(query, username, email, name, token, expiration, 1);
-            LOG_TRACE << "username: " << username << ", email: " << email << ", name: " << name << ", token: " << token << ", expiration: " << expiration;
+            result = clientPtr->execSqlSync(query, username, email, name, 1);
+            LOG_TRACE << "username: " << username << ", email: " << email << ", name: " << name;
             output.append(".... done !!!!");
         } else {
             output.append("Database exists, skipping user and category creation");

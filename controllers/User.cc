@@ -102,14 +102,15 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
                 std::string exp = json["exp"].asString();
                 if (isAuthorized(email)) {
                     req->session()->insert("exp", exp);
+                    req->session()->insert("email", email);
+                    std::string query = "UPDATE " + helpers::TablePrefix + "Users SET token = $1 WHERE email = $2";
+                    auto clientPtr = drogon::app().getDbClient();
+                    auto result = clientPtr->execSqlSync(query, exp, email);
+                    LOG_TRACE << "Logged in";
+                    auto resp = drogon::HttpResponse::newRedirectionResponse(req->getHeader("referer"));
+                    callback(resp);
+                    return;
                 }
-                std::string query = "UPDATE " + helpers::TablePrefix + "Users SET Password = '$1' WHERE email = '$2'";
-                auto clientPtr = drogon::app().getDbClient();
-                auto result = clientPtr->execSqlSync(query, exp, email);
-                LOG_TRACE << "Logged in";
-                auto resp = drogon::HttpResponse::newRedirectionResponse(req->getHeader("referer"));
-                callback(resp);
-                return;
             }
         }
     }
