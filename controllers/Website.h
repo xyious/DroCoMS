@@ -30,6 +30,7 @@ class Website {
         std::string                             getTitle();
         std::string                             getTitleTag();
         std::string                             getStyleTag();
+        std::string                             getKeywordsTag();
         
         Website();
         Website(std::vector<std::string> keywords, std::string language, std::string title, std::string content, std::string leftSidebarContent = "", std::string rightSidebarContent = "", std::string stylesheet = "", std::vector<std::string> scripts = {});

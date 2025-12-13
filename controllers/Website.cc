@@ -44,7 +44,6 @@ void Website::setTitle(std::string title) {
 }
 
 void Website::setLeftSidebarContent(std::string content) {
-    // LOG_TRACE << "left sidebar: " << content;
     this->leftSidebarContent = "<nav class='left-sidebar'><ul><li><h3><a href='" + helpers::BaseURL + "'>Home</a></h3></li>" + content + "</ul></nav>";
 }
 
@@ -58,10 +57,22 @@ void Website::setRightSidebarContent(std::string content) {
 }
 
 std::string Website::getTitleTag() {
-    std::string title = "<title>";
-    title.append(this->title);
-    title.append("</title>");
-    return title;
+    return "<title>" + this->title + "</title>";
+}
+
+std::string Website::getKeywordsTag() {
+    if (this->keywords.size() < 1) {
+        return "";
+    }
+    std::string tag = "<meta name=\"keywords\" content=\"";
+    for (auto keyword : this->keywords) {
+        tag.append(keyword + ", ");
+    }
+    // I don't like trailing commas, even if it's unlikely to be a problem
+    tag = tag.substr(0, tag.length() - 2);
+    tag.append("\">");
+    LOG_TRACE << tag;
+    return tag;
 }
 
 std::string Website::getPost(std::string url, std::string title, std::string subtitle, std::string content, std::string author, std::string timestamp) {
@@ -83,11 +94,13 @@ std::shared_ptr<drogon::HttpResponse> Website::getPage() {
     } else {
         this->page.append(HTMLTAGEN);
     }
+    this->page.append(getKeywordsTag());
     for (auto script : this->scripts) {
         LOG_TRACE << script;
         this->page.append("<script async src='" + script + "'></script>");
     }
-    this->page.append("<script async src='https://www.googletagmanager.com/gtag/js?id=" + helpers::AnalyticsId + "'></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '" + helpers::AnalyticsId + "');</script>");
+    this->page.append("<script async src='https://www.googletagmanager.com/gtag/js?id=" + helpers::AnalyticsId);
+    this->page.append("'></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '" + helpers::AnalyticsId + "');</script>");
     this->page.append(getTitleTag() + this->stylesheet + BODYTAG + this->leftSidebarContent + this->rightSidebarContent + this->content + ENDTAG);
     resp->setStatusCode(drogon::HttpStatusCode::k200OK);
     resp->setBody(this->page);

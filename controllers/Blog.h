@@ -24,7 +24,7 @@ class Blog : public drogon::HttpController<Blog>
             void                                  renderTag(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string tag);
     static  std::string                           getLeftSidebar();
     static  std::string                           getRightSidebar(std::vector<std::string>);
-    static  void                                  parseResults(const drogon::orm::Result &result, Website *site);
+    static  void                                  parseResults(const drogon::orm::Result &result, std::unique_ptr<Website> &site);
     static  std::vector<std::string>              getKeywords(std::vector<unsigned int> &ids);
     void createSitemap();
 };
