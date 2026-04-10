@@ -102,26 +102,13 @@ void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void 
     if (req->getMethod() == drogon::HttpMethod::Post) {
         auto params = req->getParameters();
         for (auto param : params) {
-            std::string key = std::get<0>(param);
-            std::string value = std::get<1>(param);
             LOG_TRACE << "key: " << key << ", value: " << value;
-            if (key == "name") {
-                name = value;
-            } else if (key == "description") {
-                description = value;
-            } else if (key == "parent") {
-                parent = value;
-            } else if (key == "language") {
-                language = value;
-            } else if (key == "isBlog") {
-                if (value == "on") {
-                    isBlog = "1";
-                }
-            } else if (key == "isExternal") {
-                if (value == "on") {
-                    isBlog = "1";
-                }
-            }
+            name = req->getParameter("name");
+            description = req->getParameter("description");
+            parent = req->getParameter("parent");
+            language = req->getParameter("language");
+            isBlog = req->getParameter("isBlog");
+            isExternal = req->getParameter("isExternal");
         }
         auto clientPtr = drogon::app().getDbClient();
         LOG_TRACE << "Name: " << name << ", Description: " << description << ", Parent: " << parent << ", isBlog: " << isBlog;
