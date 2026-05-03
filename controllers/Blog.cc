@@ -102,7 +102,6 @@ void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void 
     if (req->getMethod() == drogon::HttpMethod::Post) {
         auto params = req->getParameters();
         for (auto param : params) {
-            LOG_TRACE << "key: " << key << ", value: " << value;
             name = req->getParameter("name");
             description = req->getParameter("description");
             parent = req->getParameter("parent");
