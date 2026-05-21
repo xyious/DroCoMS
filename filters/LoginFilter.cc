@@ -32,6 +32,6 @@ void LoginFilter::doFilter(const drogon::HttpRequestPtr &req, drogon::FilterCall
     }
     std::vector<std::string> keywords;
     std::string content = "<h1>You need to log in</h1><div id='g_id_onload' data-client_id='" + helpers::GoogleClientId + "' data-login_uri='" + helpers::BaseURL + "/login'</div>";
-    auto site = Website(keywords, "en-US", "Not logged in", content, "", "", "", { "/markdown.js", "https://accounts.google.com/gsi/client" });
+    auto site = Website(keywords, "en-US", "Not logged in", content, "", "", "", { "https://accounts.google.com/gsi/client" });
     fcb(site.getPage());
 }

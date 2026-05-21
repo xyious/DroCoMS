@@ -115,7 +115,7 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
         }
     }
     std::string content = "<div id='g_id_onload' data-client_id='" + helpers::GoogleClientId + "' data-login_uri='" + helpers::BaseURL + "/login'></div></div></div></div>";
-    auto site = Website(keywords, "en-US", "login", content, "", "", "", { "/markdown.js", "https://accounts.google.com/gsi/client" });
+    auto site = Website(keywords, "en-US", "login", content, "", "", "", { "https://accounts.google.com/gsi/client" });
     callback(site.getPage());
 }
 

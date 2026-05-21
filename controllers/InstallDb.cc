@@ -26,19 +26,10 @@ void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::f
     if (req->getMethod() == drogon::HttpMethod::Post) {
         LOG_TRACE << "Post InstallDb";
         std::string username, email, name, token;
-        auto params = req->getParameters();
-        for (auto param : params) {
-            std::string key = std::get<0>(param);
-            std::string value = std::get<1>(param);
-            if (key == "name") {
-                name = value;
-            } else if (key == "username") {
-                username = value;
-            } else if (key == "email") {
-                email = value;
-            }
-            LOG_TRACE << "param " << key << ", value: " << value;
-        }
+        name = req->getParameter("name");
+        username = req->getParameter("username");
+        email = req->getParameter("email");
+        LOG_TRACE << "name:" << name << ", email: " << email;
         query = "CREATE TABLE IF NOT EXISTS " + helpers::TablePrefix + "Blog (post_id SERIAL PRIMARY KEY, url VARCHAR(255), title VARCHAR(255), subtitle VARCHAR(255), language CHAR(5), content text, author INT, category INT, isBlog INT, create_timestamp timestamp DEFAULT current_timestamp, edit_timestamp timestamp);";
         output = "Installing Database....<br>";
         output.append("Creating blog table....<br>");
