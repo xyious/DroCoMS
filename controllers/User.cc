@@ -10,7 +10,7 @@
 #include "Website.h"
 
 bool User::isAuthorized(std::string email) {
-    std::string query = "SELECT username FROM " + helpers::TablePrefix + "Users WHERE email = $1";
+    std::string query = "SELECT username FROM " + helpers::TablePrefix + "Users WHERE email = ?";
     auto clientPtr = drogon::app().getDbClient();
     auto result = clientPtr->execSqlSync(query, email);
     for (auto row : result) {
@@ -103,7 +103,7 @@ void User::login(const drogon::HttpRequestPtr& req, std::function<void (const dr
                 if (isAuthorized(email)) {
                     req->session()->insert("exp", exp);
                     req->session()->insert("email", email);
-                    std::string query = "UPDATE " + helpers::TablePrefix + "Users SET token = $1 WHERE email = $2";
+                    std::string query = "UPDATE " + helpers::TablePrefix + "Users SET token = ? WHERE email = ?";
                     auto clientPtr = drogon::app().getDbClient();
                     auto result = clientPtr->execSqlSync(query, exp, email);
                     LOG_TRACE << "Logged in, email: " + email + ", exp: " + exp;

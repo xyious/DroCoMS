@@ -32,7 +32,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
         std::string url = std::regex_replace(title, std::regex(" "), "-");
         url = std::regex_replace(url, std::regex("[^A-Za-z0-9-_]"), "");
         LOG_TRACE << "Url: " << url << ", Title: " << title << ", Subtitle: " << subtitle << ", Author: " << author << ", Content: " << content << ", Category: " << category;
-        std::string query = "INSERT INTO " + helpers::TablePrefix + "blog (url, title, subtitle, content, isBlog, author, language, category) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING post_id";
+        std::string query = "INSERT INTO " + helpers::TablePrefix + "blog (url, title, subtitle, content, isBlog, author, language, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING post_id";
         try {
             std::string log = "Creating Post !<br>";
             int postId;
@@ -42,7 +42,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
                 postId = row["post_id"].as<int>();
             }
             std::map<std::string, int> tagMap;
-            query = "SELECT tag_id, tag FROM " + helpers::TablePrefix + "Tags WHERE tag in ($1)";
+            query = "SELECT tag_id, tag FROM " + helpers::TablePrefix + "Tags WHERE tag in (?)";
             result = clientPtr->execSqlSync(query, tags);
             for (auto row : result) {
                 tagMap[row["tag"].as<std::string>()] = row["tag_id"].as<int>();
@@ -54,7 +54,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
                 }
             }
             for (int i = 0; i < newTags.size(); i++) {
-                query = "INSERT INTO " + helpers::TablePrefix + "Tags (tag) VALUES ($1) RETURNING tag_id";
+                query = "INSERT INTO " + helpers::TablePrefix + "Tags (tag) VALUES (?) RETURNING tag_id";
                 auto result = clientPtr->execSqlSync(query, newTags[i]);
                 for (auto row : result) {
                     tagMap[newTags[i]] = row["tag_id"].as<int>();
@@ -62,7 +62,7 @@ void Blog::create(const drogon::HttpRequestPtr& req, std::function<void (const d
             }
             log.append("done<br>Assigning Tags....<br>");
             for (const auto& [key, value] : tagMap) {
-                query = "INSERT INTO " + helpers::TablePrefix + "TagsAssigned (tag_id, post_id) VALUES ($1, $2)";
+                query = "INSERT INTO " + helpers::TablePrefix + "TagsAssigned (tag_id, post_id) VALUES (?, ?)";
                 result = clientPtr->execSqlSync(query, value, postId);
             }
             log.append("done");
@@ -111,7 +111,7 @@ void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void 
         }
         auto clientPtr = drogon::app().getDbClient();
         LOG_TRACE << "Name: " << name << ", Description: " << description << ", Parent: " << parent << ", isBlog: " << isBlog;
-        std::string query = "INSERT INTO " + helpers::TablePrefix + "categories (name, description, parent, language, isBlog, isExternal) VALUES ($1, $2, $3, $4, $5, $6)";
+        std::string query = "INSERT INTO " + helpers::TablePrefix + "categories (name, description, parent, language, isBlog, isExternal) VALUES (?, ?, ?, ?, ?, ?)";
         try {
             std::string log = "Creating Category !<br>";
             auto result = clientPtr->execSqlSync(query, name, description, parent, language, isBlog, isExternal);
@@ -147,7 +147,7 @@ void Blog::createCategory(const drogon::HttpRequestPtr& req, std::function<void 
 
 void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string url) {
     auto clientPtr = drogon::app().getDbClient();
-    std::string query = "SELECT " + helpers::TablePrefix + "Blog.post_id, " + helpers::TablePrefix + "Blog.language, " + helpers::TablePrefix + "Blog.title, " + helpers::TablePrefix + "Blog.subtitle, " + helpers::TablePrefix + "Blog.url, " + helpers::TablePrefix + "Blog.content, " + helpers::TablePrefix + "Users.name, to_char(" +  helpers::TablePrefix + "Blog.create_timestamp,'Month DD YYYY') as timestamp FROM " + helpers::TablePrefix + "Blog, " + helpers::TablePrefix + "Users WHERE " + helpers::TablePrefix + "Blog.author = " + helpers::TablePrefix + "Users.id AND isBlog=1 AND url=$1 ORDER BY " + helpers::TablePrefix + "Blog.create_timestamp DESC LIMIT 1";
+    std::string query = "SELECT " + helpers::TablePrefix + "Blog.post_id, " + helpers::TablePrefix + "Blog.language, " + helpers::TablePrefix + "Blog.title, " + helpers::TablePrefix + "Blog.subtitle, " + helpers::TablePrefix + "Blog.url, " + helpers::TablePrefix + "Blog.content, " + helpers::TablePrefix + "Users.name, to_char(" +  helpers::TablePrefix + "Blog.create_timestamp,'Month DD YYYY') as timestamp FROM " + helpers::TablePrefix + "Blog, " + helpers::TablePrefix + "Users WHERE " + helpers::TablePrefix + "Blog.author = " + helpers::TablePrefix + "Users.id AND isBlog=1 AND url=? ORDER BY " + helpers::TablePrefix + "Blog.create_timestamp DESC LIMIT 1";
     auto result = clientPtr->execSqlSync(query, url);
     std::unique_ptr<Website> site = std::make_unique<Website>();
     parseResults(result, site);
@@ -156,7 +156,7 @@ void Blog::renderPost(const drogon::HttpRequestPtr& req, std::function<void (con
 
 void Blog::renderCategory(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string category) {
     auto clientPtr = drogon::app().getDbClient();
-    std::string query = "SELECT " + helpers::TablePrefix + "Blog.language, " + helpers::TablePrefix + "Blog.title, " + helpers::TablePrefix + "Blog.subtitle, " + helpers::TablePrefix + "Blog.url, " + helpers::TablePrefix + "Blog.content, " + helpers::TablePrefix + "Users.name, to_char(" +  helpers::TablePrefix + "Blog.create_timestamp,'Month DD YYYY') as timestamp FROM " + helpers::TablePrefix + "Blog, " + helpers::TablePrefix + "Users, " + helpers::TablePrefix + "Tags, " + helpers::TablePrefix + "TagsAssigned, " + helpers::TablePrefix + "Categories WHERE " + helpers::TablePrefix + "Blog.author = " + helpers::TablePrefix + "Users.id AND " + helpers::TablePrefix + "Blog.isBlog=1 AND " + helpers::TablePrefix + "Blog.category = " + helpers::TablePrefix + "categories.id AND "  + helpers::TablePrefix + "categories.name = $1 ORDER BY " + helpers::TablePrefix + "blog.create_timestamp DESC LIMIT 3";
+    std::string query = "SELECT " + helpers::TablePrefix + "Blog.language, " + helpers::TablePrefix + "Blog.title, " + helpers::TablePrefix + "Blog.subtitle, " + helpers::TablePrefix + "Blog.url, " + helpers::TablePrefix + "Blog.content, " + helpers::TablePrefix + "Users.name, to_char(" +  helpers::TablePrefix + "Blog.create_timestamp,'Month DD YYYY') as timestamp FROM " + helpers::TablePrefix + "Blog, " + helpers::TablePrefix + "Users, " + helpers::TablePrefix + "Tags, " + helpers::TablePrefix + "TagsAssigned, " + helpers::TablePrefix + "Categories WHERE " + helpers::TablePrefix + "Blog.author = " + helpers::TablePrefix + "Users.id AND " + helpers::TablePrefix + "Blog.isBlog=1 AND " + helpers::TablePrefix + "Blog.category = " + helpers::TablePrefix + "categories.id AND "  + helpers::TablePrefix + "categories.name = ? ORDER BY " + helpers::TablePrefix + "blog.create_timestamp DESC LIMIT 3";
     auto result = clientPtr->execSqlSync(query, category);
     std::unique_ptr<Website> site = std::make_unique<Website>();
     parseResults(result, site);
@@ -165,7 +165,7 @@ void Blog::renderCategory(const drogon::HttpRequestPtr& req, std::function<void 
 
 void Blog::renderTag(const drogon::HttpRequestPtr& req, std::function<void (const drogon::HttpResponsePtr &)> &&callback, std::string tag) {
     auto clientPtr = drogon::app().getDbClient();
-    std::string query = "SELECT " + helpers::TablePrefix + "Blog.language, " + helpers::TablePrefix + "Blog.title, " + helpers::TablePrefix + "Blog.subtitle, " + helpers::TablePrefix + "Blog.url, " + helpers::TablePrefix + "Blog.content, " + helpers::TablePrefix + "Users.name, to_char(" +  helpers::TablePrefix + "Blog.create_timestamp,'Month DD YYYY') as timestamp FROM " + helpers::TablePrefix + "Blog, " + helpers::TablePrefix + "Users, " + helpers::TablePrefix + "Tags, " + helpers::TablePrefix + "TagsAssigned WHERE " + helpers::TablePrefix + "Blog.author = " + helpers::TablePrefix + "Users.id AND isBlog=1 AND " + helpers::TablePrefix + "Blog.post_id = " + helpers::TablePrefix + "TagsAssigned.post_id AND " + helpers::TablePrefix + "Tags.tag_id = " + helpers::TablePrefix + "TagsAssigned.tag_id AND " + helpers::TablePrefix + "Tags.tag = $1 ORDER BY " + helpers::TablePrefix + "blog.create_timestamp DESC LIMIT 3";
+    std::string query = "SELECT " + helpers::TablePrefix + "Blog.language, " + helpers::TablePrefix + "Blog.title, " + helpers::TablePrefix + "Blog.subtitle, " + helpers::TablePrefix + "Blog.url, " + helpers::TablePrefix + "Blog.content, " + helpers::TablePrefix + "Users.name, to_char(" +  helpers::TablePrefix + "Blog.create_timestamp,'Month DD YYYY') as timestamp FROM " + helpers::TablePrefix + "Blog, " + helpers::TablePrefix + "Users, " + helpers::TablePrefix + "Tags, " + helpers::TablePrefix + "TagsAssigned WHERE " + helpers::TablePrefix + "Blog.author = " + helpers::TablePrefix + "Users.id AND isBlog=1 AND " + helpers::TablePrefix + "Blog.post_id = " + helpers::TablePrefix + "TagsAssigned.post_id AND " + helpers::TablePrefix + "Tags.tag_id = " + helpers::TablePrefix + "TagsAssigned.tag_id AND " + helpers::TablePrefix + "Tags.tag = ? ORDER BY " + helpers::TablePrefix + "blog.create_timestamp DESC LIMIT 3";
     auto result = clientPtr->execSqlSync(query, tag);
     std::unique_ptr<Website> site = std::make_unique<Website>();
     parseResults(result, site);
@@ -185,7 +185,7 @@ void Blog::renderArchive(const drogon::HttpRequestPtr& req, std::function<void (
         links[row["post_id"].as<int>()] = link;
     }
     for (auto link : links) {
-        query = "SELECT " + helpers::TablePrefix + "tags.tag FROM " + helpers::TablePrefix + "Tags, " + helpers::TablePrefix + "TagsAssigned WHERE " + helpers::TablePrefix + "Tags.tag_id = " + helpers::TablePrefix + "TagsAssigned.tag_id AND " + helpers::TablePrefix + "TagsAssigned.post_id = $1";
+        query = "SELECT " + helpers::TablePrefix + "tags.tag FROM " + helpers::TablePrefix + "Tags, " + helpers::TablePrefix + "TagsAssigned WHERE " + helpers::TablePrefix + "Tags.tag_id = " + helpers::TablePrefix + "TagsAssigned.tag_id AND " + helpers::TablePrefix + "TagsAssigned.post_id = ?";
         auto result = clientPtr->execSqlSync(query, link.first);
         for (auto row : result) {
             std::string tag = row["tag"].as<std::string>();
@@ -234,7 +234,7 @@ std::vector<std::string> Blog::getKeywords(std::vector<unsigned int> &ids) {
     if (ids.size() > 0) {
         auto clientPtr = drogon::app().getDbClient();
         std::vector<std::string> keywords;
-        std::string query = "SELECT " + helpers::TablePrefix + "Tags.tag FROM " + helpers::TablePrefix + "Tags, " + helpers::TablePrefix + "TagsAssigned WHERE " + helpers::TablePrefix + "Tags.tag_id = " + helpers::TablePrefix + "TagsAssigned.tag_id AND " + helpers::TablePrefix + "TagsAssigned.post_id IN ($1)";
+        std::string query = "SELECT " + helpers::TablePrefix + "Tags.tag FROM " + helpers::TablePrefix + "Tags, " + helpers::TablePrefix + "TagsAssigned WHERE " + helpers::TablePrefix + "Tags.tag_id = " + helpers::TablePrefix + "TagsAssigned.tag_id AND " + helpers::TablePrefix + "TagsAssigned.post_id IN (?)";
         auto result = clientPtr->execSqlSync(query, ids.front());
         for (auto row : result) {
             keywords.push_back(row["tag"].as<std::string>());

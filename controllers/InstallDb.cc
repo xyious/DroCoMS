@@ -51,7 +51,7 @@ void InstallDb::asyncHandleHttpRequest(const drogon::HttpRequestPtr& req, std::f
             query = "INSERT INTO " + helpers::TablePrefix + "Categories (name, description, language, isBlog, isExternal) VALUES ('main', 'This is where literally everything goes', 'en-US', 1, 0);";
             result = clientPtr->execSqlSync(query);
             output.append(".... done<br>Creating user....<br>");
-            query = "INSERT INTO " + helpers::TablePrefix + "Users (username, email, name, can_post) VALUES ($1, $2, $3, $4)";
+            query = "INSERT INTO " + helpers::TablePrefix + "Users (username, email, name, can_post) VALUES (?, ?, ?, ?)";
             std::string password = email + std::to_string(trantor::Date::date().microSecondsSinceEpoch());
             result = clientPtr->execSqlSync(query, username, email, name, 1);
             LOG_TRACE << "username: " << username << ", email: " << email << ", name: " << name;
